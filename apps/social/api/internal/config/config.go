@@ -9,6 +9,7 @@ type Config struct {
 	rest.RestConf
 
 	SocialRpc zrpc.RpcClientConf
+	UserRpc   zrpc.RpcClientConf
 
 	JwtAuth struct {
 		AccessSecret string
