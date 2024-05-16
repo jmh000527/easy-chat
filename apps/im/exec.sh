@@ -5,3 +5,5 @@ goctl rpc protoc apps/im/rpc/im.proto --go_out=./apps/im/rpc --go-grpc_out=./app
 goctl model mongo --type conversations --dir ./apps/im/immodels
 
 goctl model mongo --type conversation --dir ./apps/im/immodels
+
+goctl api go -api apps/im/api/im.api -dir apps/im/api -style gozero
