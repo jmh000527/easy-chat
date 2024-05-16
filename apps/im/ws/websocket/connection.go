@@ -9,6 +9,7 @@ import (
 
 type Conn struct {
 	idleMu sync.Mutex
+	Uid    string
 	wsConn *websocket.Conn
 	s      *Server
 
@@ -91,7 +92,7 @@ func NewConn(s *Server, w http.ResponseWriter, r *http.Request) *Conn {
 		done:              make(chan struct{}),
 	}
 
-	go conn.keepalive()
+	//go conn.keepalive()
 
 	return conn
 }

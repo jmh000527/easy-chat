@@ -130,6 +130,9 @@ func (s *Server) addConn(conn *Conn, req *http.Request) {
 
 // handlerConn 根据连接对象进行任务处理
 func (s *Server) handlerConn(conn *Conn) {
+	uids := s.GetUsers(conn)
+	conn.Uid = uids[0]
+
 	for {
 		// 获取请求消息
 		_, msg, err := conn.ReadMessage()
@@ -158,14 +161,6 @@ func (s *Server) handlerConn(conn *Conn) {
 				handler(s, conn, &message)
 			}
 		}
-		if handler, ok := s.routes[message.Method]; ok {
-			handler(s, conn, &message)
-		} else {
-			s.Send(&Message{
-				FrameType: FrameData,
-				Data:      fmt.Sprintf("不存在执行的方法 %v 请检查", message.Method),
-			}, conn)
-		}
 	}
 }
 
@@ -191,7 +186,7 @@ func (s *Server) ServerWs(w http.ResponseWriter, r *http.Request) {
 	//鉴权
 	if !s.authentication.Authenticate(w, r) {
 		s.Send(&Message{FrameType: FrameData, Data: fmt.Sprint("不具备访问权限")}, conn)
-		s.Close(conn)
+		conn.Close()
 		return
 	}
 

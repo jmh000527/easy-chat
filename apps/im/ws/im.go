@@ -11,7 +11,8 @@ import (
 	"time"
 )
 
-var configFile = flag.String("f", "etc/dev/im.yaml", "the config file")
+// var configFile = flag.String("f", "etc/dev/im.yaml", "the config file")
+var configFile = flag.String("f", "C:/Users/jmh00/GolandProjects/easy-chat/apps/im/ws/etc/dev/im.yaml", "the config file")
 
 func main() {
 	flag.Parse()

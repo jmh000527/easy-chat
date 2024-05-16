@@ -43,7 +43,24 @@ services:
       - ./components/mysql/data:/var/lib/mysql
       - /etc/localtime:/etc/localtime
     environment:
+      TZ: Asia/Shanghai
       MYSQL_ROOT_PASSWORD: easy-chat
+    restart: always
+    networks:
+      easy-chat:
+
+  mongo:
+    image: mongo:7.0
+    container_name: mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: easy-chat
+      TZ: Asia/Shanghai
+    ports:
+      - 47017:27017
+    volumes:
+      - ./components/mongo/data:/data/db
+      - /etc/localtime:/etc/localtime
     restart: always
     networks:
       easy-chat:
