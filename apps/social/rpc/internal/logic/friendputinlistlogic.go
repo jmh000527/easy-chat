@@ -29,7 +29,7 @@ func NewFriendPutInListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *F
 func (l *FriendPutInListLogic) FriendPutInList(in *social.FriendPutInListReq) (*social.FriendPutInListResp, error) {
 	friendReqList, err := l.svcCtx.FriendRequestsModel.ListNoHandler(l.ctx, in.UserId)
 	if err != nil {
-		return nil, errors.Wrapf(xerr.NewDBErr(), "find list friend req err %v req %v", err, in.UserId)
+		return nil, errors.Wrapf(xerr.NewDBErr(), "find list friend req err: %v req: %v", err, in.UserId)
 	}
 
 	var resp []*social.FriendRequests

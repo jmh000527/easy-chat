@@ -144,7 +144,7 @@ func (l *GroupPutinLogic) createGroupReq(groupReq *socialmodels.GroupRequests, i
 
 	_, err := l.svcCtx.GroupRequestsModel.Insert(l.ctx, groupReq)
 	if err != nil {
-		return nil, errors.Wrapf(xerr.NewDBErr(), "insert group req err %v req %v", err, groupReq)
+		return nil, errors.Wrapf(xerr.NewDBErr(), "insert group req err: %v req: %v", err, groupReq)
 	}
 
 	if isPass {
@@ -163,7 +163,7 @@ func (l *GroupPutinLogic) createGroupMember(in *social.GroupPutinReq) error {
 	}
 	_, err := l.svcCtx.GroupMembersModel.Insert(l.ctx, nil, groupMember)
 	if err != nil {
-		return errors.Wrapf(xerr.NewDBErr(), "insert friend err %v req %v", err, groupMember)
+		return errors.Wrapf(xerr.NewDBErr(), "insert friend err: %v req: %v", err, groupMember)
 	}
 
 	return nil

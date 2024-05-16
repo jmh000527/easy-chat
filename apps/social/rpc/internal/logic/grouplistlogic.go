@@ -29,7 +29,7 @@ func NewGroupListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GroupLi
 func (l *GroupListLogic) GroupList(in *social.GroupListReq) (*social.GroupListResp, error) {
 	userGroup, err := l.svcCtx.GroupMembersModel.ListByUserId(l.ctx, in.UserId)
 	if err != nil {
-		return nil, errors.Wrapf(xerr.NewDBErr(), "list group member err %v req %v", err, in.UserId)
+		return nil, errors.Wrapf(xerr.NewDBErr(), "list group member err: %v req: %v", err, in.UserId)
 	}
 	if len(userGroup) == 0 {
 		return &social.GroupListResp{}, nil
@@ -41,7 +41,7 @@ func (l *GroupListLogic) GroupList(in *social.GroupListReq) (*social.GroupListRe
 	}
 	groups, err := l.svcCtx.GroupsModel.ListByGroupIds(l.ctx, ids)
 	if err != nil {
-		return nil, errors.Wrapf(xerr.NewDBErr(), "list group err %v req %v", err, ids)
+		return nil, errors.Wrapf(xerr.NewDBErr(), "list group err: %v req: %v", err, ids)
 	}
 
 	var respList []*social.Groups

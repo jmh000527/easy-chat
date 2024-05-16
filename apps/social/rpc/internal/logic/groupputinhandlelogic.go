@@ -54,7 +54,7 @@ func (l *GroupPutInHandleLogic) GroupPutInHandle(in *social.GroupPutInHandleReq)
 
 	err = l.svcCtx.GroupRequestsModel.Trans(l.ctx, func(ctx context.Context, session sqlx.Session) error {
 		if err := l.svcCtx.GroupRequestsModel.Update(l.ctx, session, groupReq); err != nil {
-			return errors.Wrapf(xerr.NewDBErr(), "update friend req err %v req %v", err, groupReq)
+			return errors.Wrapf(xerr.NewDBErr(), "update friend req err: %v req: %v", err, groupReq)
 		}
 
 		if constants.HandlerResult(groupReq.HandleResult.Int64) != constants.PassHandlerResult {
@@ -69,7 +69,7 @@ func (l *GroupPutInHandleLogic) GroupPutInHandle(in *social.GroupPutInHandleReq)
 		}
 		_, err = l.svcCtx.GroupMembersModel.Insert(l.ctx, session, groupMember)
 		if err != nil {
-			return errors.Wrapf(xerr.NewDBErr(), "insert friend err %v req %v", err, groupMember)
+			return errors.Wrapf(xerr.NewDBErr(), "insert friend err: %v req: %v", err, groupMember)
 		}
 
 		return nil
