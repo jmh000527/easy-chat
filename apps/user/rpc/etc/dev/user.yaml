@@ -2,5 +2,17 @@ Name: user.rpc
 ListenOn: 0.0.0.0:10000
 Etcd:
   Hosts:
-  - 192.168.199.138:3379
+    - 192.168.199.138:3379
   Key: user.rpc
+
+Mysql:
+  DataSource: root@easy-chat@tcp(192.168.199.138:13306)/easy-chat?charset=utf8mb4
+
+Cache:
+  - Host: 192.168.199.138:16379
+    Type: node
+    Pass: easy-chat
+
+Jwt:
+  AccessSecret: jmh
+  AccessExpire: 8640000
