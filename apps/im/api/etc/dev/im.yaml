@@ -1,0 +1,12 @@
+Name: im
+Host: 0.0.0.0
+Port: 8882
+
+ImRpc:
+  Etcd:
+    Hosts:
+      - 192.168.199.138:3379
+    Key: im.rpc
+
+JwtAuth:
+  AccessSecret: github/jmh000527

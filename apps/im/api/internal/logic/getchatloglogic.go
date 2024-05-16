@@ -2,6 +2,8 @@ package logic
 
 import (
 	"context"
+	"easy-chat/apps/im/rpc/imclient"
+	"github.com/jinzhu/copier"
 
 	"easy-chat/apps/im/api/internal/svc"
 	"easy-chat/apps/im/api/internal/types"
@@ -24,7 +26,18 @@ func NewGetChatLogLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetCha
 }
 
 func (l *GetChatLogLogic) GetChatLog(req *types.ChatLogReq) (resp *types.ChatLogResp, err error) {
-	// todo: add your logic here and delete this line
+	data, err := l.svcCtx.GetChatLog(l.ctx, &imclient.GetChatLogReq{
+		ConversationId: req.ConversationId,
+		StartSendTime:  req.StartSendTime,
+		EndSendTime:    req.EndSendTime,
+		Count:          req.Count,
+	})
+	if err != nil {
+		return nil, err
+	}
 
-	return
+	var res types.ChatLogResp
+	copier.Copy(&res, &data)
+
+	return &res, err
 }

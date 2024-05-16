@@ -2,6 +2,7 @@ package logic
 
 import (
 	"context"
+	"easy-chat/apps/im/rpc/im"
 
 	"easy-chat/apps/im/api/internal/svc"
 	"easy-chat/apps/im/api/internal/types"
@@ -24,7 +25,11 @@ func NewSetUpUserConversationLogic(ctx context.Context, svcCtx *svc.ServiceConte
 }
 
 func (l *SetUpUserConversationLogic) SetUpUserConversation(req *types.SetUpUserConversationReq) (resp *types.SetUpUserConversationResp, err error) {
-	// todo: add your logic here and delete this line
+	_, err = l.svcCtx.SetUpUserConversation(l.ctx, &im.SetUpUserConversationReq{
+		SendId:   req.SendId,
+		RecvId:   req.RecvId,
+		ChatType: req.ChatType,
+	})
 
 	return
 }
