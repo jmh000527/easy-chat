@@ -9,5 +9,5 @@ UserRpc:
     Key: user.rpc
 
 JwtAuth:
-  AccessSecret: "github/jmh000527"
+  AccessSecret: github/jmh000527
   AccessExpire: 8640000
