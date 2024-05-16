@@ -8,8 +8,9 @@ type websocketOption struct {
 	Authentication
 	patten string
 
-	ack        AckType
-	ackTimeout time.Duration
+	ack          AckType
+	ackTimeout   time.Duration
+	sendErrCount int
 
 	maxConnectionIdle time.Duration
 }
@@ -19,6 +20,7 @@ func newWebsocketServerOption(opts ...ServerOptions) websocketOption {
 		Authentication:    new(webSocketAuthentication),
 		maxConnectionIdle: defaultMaxConnectionIdle,
 		ackTimeout:        defaultAckTimeout,
+		sendErrCount:      defaultSendErrCount,
 		patten:            "/ws",
 	}
 	for _, opt := range opts {
@@ -42,6 +44,12 @@ func WithWebsocketPatten(patten string) ServerOptions {
 func WithServerAck(ack AckType) ServerOptions {
 	return func(opt *websocketOption) {
 		opt.ack = ack
+	}
+}
+
+func WithServerSendErrCount(sendErrCount int) ServerOptions {
+	return func(opt *websocketOption) {
+		opt.sendErrCount = sendErrCount
 	}
 }
 
