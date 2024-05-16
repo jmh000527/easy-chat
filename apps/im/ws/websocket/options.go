@@ -13,6 +13,8 @@ type websocketOption struct {
 	sendErrCount int
 
 	maxConnectionIdle time.Duration
+
+	concurrency int // 群消息并发量级
 }
 
 func newWebsocketServerOption(opts ...ServerOptions) websocketOption {
@@ -22,6 +24,7 @@ func newWebsocketServerOption(opts ...ServerOptions) websocketOption {
 		ackTimeout:        defaultAckTimeout,
 		sendErrCount:      defaultSendErrCount,
 		patten:            "/ws",
+		concurrency:       defaultConcurrency,
 	}
 	for _, opt := range opts {
 		opt(&o)

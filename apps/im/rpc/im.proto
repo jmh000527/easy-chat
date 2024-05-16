@@ -83,6 +83,6 @@ service Im {
   rpc GetConversations(GetConversationsReq) returns(GetConversationsResp);
   // 更新会话
   rpc PutConversations(PutConversationsReq)  returns(PutConversationsResp);
-
+  // 创建群聊
   rpc CreateGroupConversation(CreateGroupConversationReq) returns(CreateGroupConversationResp);
 }

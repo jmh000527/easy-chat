@@ -31,6 +31,7 @@ func NewSetUpUserConversationLogic(ctx context.Context, svcCtx *svc.ServiceConte
 
 // SetUpUserConversation 建立会话: 群聊, 私聊
 func (l *SetUpUserConversationLogic) SetUpUserConversation(in *im.SetUpUserConversationReq) (*im.SetUpUserConversationResp, error) {
+	var resp im.SetUpUserConversationResp
 	switch constants.ChatType(in.ChatType) {
 	case constants.SingleChatType:
 		// 生成会话的ID
@@ -51,9 +52,8 @@ func (l *SetUpUserConversationLogic) SetUpUserConversation(in *im.SetUpUserConve
 			}
 		} else if conversation != nil {
 			// 会话已经建立过，不需要重复建立
-			return nil, nil
+			return &resp, nil
 		}
-
 		// 建立两者的会话
 		err = l.setUpUserConversation(conversationId, in.SendId, in.RecvId, constants.SingleChatType, true)
 		if err != nil {
@@ -64,8 +64,12 @@ func (l *SetUpUserConversationLogic) SetUpUserConversation(in *im.SetUpUserConve
 		if err != nil {
 			return nil, err
 		}
-
 	case constants.GroupChatType:
+		// 接收者ID就是群会话ID
+		err := l.setUpUserConversation(in.RecvId, in.SendId, in.RecvId, constants.GroupChatType, true)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return &im.SetUpUserConversationResp{}, nil

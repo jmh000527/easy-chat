@@ -6,6 +6,7 @@ import (
 	"easy-chat/apps/im/ws/ws"
 	"easy-chat/apps/task/mq/mq"
 	"easy-chat/pkg/constants"
+	"easy-chat/pkg/wuid"
 	"github.com/mitchellh/mapstructure"
 	"time"
 )
@@ -15,39 +16,59 @@ func Chat(svc *svc.ServiceContext) websocket.HandlerFunc {
 		// todo: 私聊
 		var data ws.Chat
 		if err := mapstructure.Decode(msg.Data, &data); err != nil {
-			srv.Send(websocket.NewErrMessage(err), conn)
+			err := srv.Send(websocket.NewErrMessage(err), conn)
+			if err != nil {
+				srv.Errorf("error message send error: %v", err)
+			}
 			return
 		}
-		switch data.ChatType {
-		case constants.SingleChatType:
-			err := svc.MsgChatTransferClient.Push(&mq.MsgChatTransfer{
-				ConversationId: data.ConversationId,
-				ChatType:       data.ChatType,
-				SendId:         conn.Uid,
-				RecvId:         data.RecvId,
-				SendTime:       time.Now().UnixNano(),
-				MType:          data.Msg.MType,
-				Content:        data.Msg.Content,
-			})
-			if err != nil {
-				srv.Send(websocket.NewErrMessage(err), conn)
-				return
+		// 如果传递了会话ID，直接发送，否则分类型创建会话ID
+		if data.ConversationId == "" {
+			switch data.ChatType {
+			case constants.SingleChatType:
+				data.ConversationId = wuid.CombineId(conn.Uid, data.RecvId)
+			case constants.GroupChatType:
+				data.ConversationId = data.RecvId
 			}
-			//err := logic.NewConversation(context.Background(), srv, svc).SingleChat(&data, conn.Uid)
-			//if err != nil {
-			//	srv.Send(websocket.NewErrMessage(err), conn)
-			//	return
-			//}
-			//// 发送消息
-			//srv.SendByUserIds(websocket.NewMessage(conn.Uid, ws.Chat{
-			//	ConversationId: data.ConversationId,
-			//	ChatType:       data.ChatType,
-			//	SendId:         conn.Uid,
-			//	RecvId:         data.RecvId,
-			//	SendTime:       time.Now().UnixMilli(),
-			//	Msg:            data.Msg,
-			//}), data.RecvId)
 		}
+		// 发送
+		err := svc.MsgChatTransferClient.Push(&mq.MsgChatTransfer{
+			ConversationId: data.ConversationId,
+			ChatType:       data.ChatType,
+			SendId:         conn.Uid,
+			RecvId:         data.RecvId,
+			SendTime:       time.Now().UnixNano(),
+			MType:          data.Msg.MType,
+			Content:        data.Msg.Content,
+		})
+		if err != nil {
+			err := srv.Send(websocket.NewErrMessage(err), conn)
+			if err != nil {
+				srv.Errorf("error message send error: %v", err)
+			}
+			return
+		}
+		//switch data.ChatType {
+		//case constants.SingleChatType:
+		//	err := svc.MsgChatTransferClient.Push(&mq.MsgChatTransfer{
+		//		ConversationId: data.ConversationId,
+		//		ChatType:       data.ChatType,
+		//		SendId:         conn.Uid,
+		//		RecvId:         data.RecvId,
+		//		SendTime:       time.Now().UnixNano(),
+		//		MType:          data.Msg.MType,
+		//		Content:        data.Msg.Content,
+		//	})
+		//	if err != nil {
+		//		err := srv.Send(websocket.NewErrMessage(err), conn)
+		//		if err != nil {
+		//			srv.Errorf("single chat message send error: %s", err.Error())
+		//			return
+		//		}
+		//	}
+		//case constants.GroupChatType:
+		//
+		//}
 
 	}
 }
