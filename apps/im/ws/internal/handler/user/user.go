@@ -2,16 +2,14 @@ package user
 
 import (
 	"easy-chat/apps/im/ws/internal/svc"
-	websocketx "easy-chat/apps/im/ws/websocket"
-	"github.com/gorilla/websocket"
+	"easy-chat/apps/im/ws/websocket"
 )
 
-func OnLine(svc *svc.ServiceContext) websocketx.HandlerFunc {
-	return func(srv *websocketx.Server, conn *websocket.Conn, msg *websocketx.Message) {
+func OnLine(svc *svc.ServiceContext) websocket.HandlerFunc {
+	return func(srv *websocket.Server, conn *websocket.Conn, msg *websocket.Message) {
 		uids := srv.GetUsers()
-
-		userId := srv.GetUsers(conn)
-		err := srv.Send(websocketx.NewMessage(userId[0], uids), conn)
-		srv.Info("err: ", err)
+		u := srv.GetUsers(conn)
+		err := srv.Send(websocket.NewMessage(u[0], uids), conn)
+		srv.Info("err ", err)
 	}
 }
