@@ -7,7 +7,6 @@ import (
 	"easy-chat/apps/im/ws/websocket"
 	"easy-chat/apps/im/ws/ws"
 	"easy-chat/pkg/wuid"
-	"fmt"
 	"time"
 )
 
@@ -42,7 +41,6 @@ func (l *ConversationLogic) SingleChat(data *ws.Chat, userId string) error {
 		MsgContent:     data.Content,
 		SendTime:       time.Now().UnixNano(),
 	}
-	fmt.Printf("RercvId: %v\n", data.RecvId)
 	err := l.svc.ChatLogModel.Insert(l.ctx, &chatLog)
 
 	return err
