@@ -3,6 +3,7 @@ package immodels
 
 import (
 	"context"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"time"
 
 	"github.com/zeromicro/go-zero/core/stores/mon"
@@ -57,10 +58,19 @@ func (m *defaultConversationsModel) FindOne(ctx context.Context, id string) (*Co
 	}
 }
 
+//func (m *defaultConversationsModel) Update(ctx context.Context, data *Conversations) (*mongo.UpdateResult, error) {
+//	data.UpdateAt = time.Now()
+//
+//	res, err := m.conn.UpdateOne(ctx, bson.M{"_id": data.ID}, bson.M{"$set": data})
+//	return res, err
+//}
+
 func (m *defaultConversationsModel) Update(ctx context.Context, data *Conversations) (*mongo.UpdateResult, error) {
 	data.UpdateAt = time.Now()
 
-	res, err := m.conn.UpdateOne(ctx, bson.M{"_id": data.ID}, bson.M{"$set": data})
+	res, err := m.conn.UpdateOne(ctx, bson.M{"_id": data.ID}, bson.M{
+		"$set": data,
+	}, options.Update().SetUpsert(true))
 	return res, err
 }
 

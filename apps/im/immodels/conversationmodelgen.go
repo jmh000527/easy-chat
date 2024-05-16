@@ -40,14 +40,9 @@ func (m *defaultConversationModel) Insert(ctx context.Context, data *Conversatio
 }
 
 func (m *defaultConversationModel) FindOne(ctx context.Context, id string) (*Conversation, error) {
-	oid, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		return nil, ErrInvalidObjectId
-	}
-
 	var data Conversation
 
-	err = m.conn.FindOne(ctx, &data, bson.M{"_id": oid})
+	err := m.conn.FindOne(ctx, &data, bson.M{"conversationId": id})
 	switch err {
 	case nil:
 		return &data, nil
