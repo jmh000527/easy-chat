@@ -93,6 +93,7 @@ func (m *MsgReadTransfer) Consume(key, value string) error {
 		// 若不开启
 		if m.svcCtx.Config.MsgReadHandler.GroupMsgReadHandler == GroupMsgReadHandlerAtTransfer {
 			m.push <- push
+			break
 		}
 		// 开启
 		m.mu.Lock()
