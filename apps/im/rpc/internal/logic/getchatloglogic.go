@@ -31,7 +31,7 @@ func (l *GetChatLogLogic) GetChatLog(in *im.GetChatLogReq) (*im.GetChatLogResp, 
 	if in.MsgId != "" {
 		chatLog, err := l.svcCtx.ChatLogModel.FindOne(l.ctx, in.MsgId)
 		if err != nil {
-			return nil, errors.Wrapf(xerr.NewDBErr(), "find chat log by msgId %s failed", in.MsgId)
+			return nil, errors.Wrapf(xerr.NewDBErr(), "find chatlog by msgId %s failed", in.MsgId)
 		}
 		return &im.GetChatLogResp{
 			List: []*im.ChatLog{
@@ -44,6 +44,7 @@ func (l *GetChatLogLogic) GetChatLog(in *im.GetChatLogReq) (*im.GetChatLogResp, 
 					MsgContent:     chatLog.MsgContent,
 					ChatType:       int32(chatLog.ChatType),
 					SendTime:       chatLog.SendTime,
+					ReadRecords:    chatLog.ReadRecords,
 				},
 			},
 		}, nil
@@ -52,7 +53,7 @@ func (l *GetChatLogLogic) GetChatLog(in *im.GetChatLogReq) (*im.GetChatLogResp, 
 	// 根据时间段，分段查询
 	data, err := l.svcCtx.ChatLogModel.ListBySendTime(l.ctx, in.ConversationId, in.StartSendTime, in.EndSendTime, in.Count)
 	if err != nil {
-		return nil, errors.Wrapf(xerr.NewDBErr(), "list by send time failed, err: %v req: %v", err.Error(), in)
+		return nil, errors.Wrapf(xerr.NewDBErr(), "find chatLog list by SendTime failed, err: %v req: %v", err.Error(), in)
 	}
 	res := make([]*im.ChatLog, 0, len(data))
 	for _, v := range data {
@@ -65,6 +66,7 @@ func (l *GetChatLogLogic) GetChatLog(in *im.GetChatLogReq) (*im.GetChatLogResp, 
 			MsgContent:     v.MsgContent,
 			ChatType:       int32(v.ChatType),
 			SendTime:       v.SendTime,
+			ReadRecords:    v.ReadRecords,
 		})
 	}
 	return &im.GetChatLogResp{

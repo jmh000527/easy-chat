@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/gorilla/websocket"
 	"log"
 	"net/http"
@@ -31,8 +30,8 @@ func serverWs(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func main() {
-	http.HandleFunc("/ws", serverWs)
-	fmt.Println("启动websocket")
-	log.Fatal(http.ListenAndServe("0.0.0.0:12340", nil))
-}
+//func main() {
+//	http.HandleFunc("/ws", serverWs)
+//	fmt.Println("启动websocket")
+//	log.Fatal(http.ListenAndServe("0.0.0.0:12340", nil))
+//}

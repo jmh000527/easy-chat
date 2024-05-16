@@ -10,6 +10,20 @@ MsgChatTransfer:
   Offset: first
   Consumers: 1
 
+MsgReadTransfer:
+  Name: MsgReadTransfer
+  Brokers:
+    - 192.168.199.138:9092
+  Group: kafka
+  Topic: msgReadTransfer
+  Offset: first
+  Consumers: 1
+
+MsgReadHandler:
+  GroupMsgReadHandler: 1
+  GroupMsgReadRecordDelayTime: 2
+  GroupMsgReadRecordDelayCount: 2
+
 Redisx:
   Host: 192.168.199.138:16379
   Type: node

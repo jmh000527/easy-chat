@@ -1,12 +1,24 @@
 Name: im
 Host: 0.0.0.0
-Port: 8882
+Port: 8889
 
 ImRpc:
   Etcd:
     Hosts:
       - 192.168.199.138:3379
     Key: im.rpc
+
+SocialRpc:
+  Etcd:
+    Hosts:
+      - 192.168.199.138:3379
+    Key: social.rpc
+
+UserRpc:
+  Etcd:
+    Hosts:
+      - 192.168.199.138:3379
+    Key: user.rpc
 
 JwtAuth:
   AccessSecret: github/jmh000527

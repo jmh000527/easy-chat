@@ -48,27 +48,34 @@ func Chat(svc *svc.ServiceContext) websocket.HandlerFunc {
 			}
 			return
 		}
-		//switch data.ChatType {
-		//case constants.SingleChatType:
-		//	err := svc.MsgChatTransferClient.Push(&mq.MsgChatTransfer{
-		//		ConversationId: data.ConversationId,
-		//		ChatType:       data.ChatType,
-		//		SendId:         conn.Uid,
-		//		RecvId:         data.RecvId,
-		//		SendTime:       time.Now().UnixNano(),
-		//		MType:          data.Msg.MType,
-		//		Content:        data.Msg.Content,
-		//	})
-		//	if err != nil {
-		//		err := srv.Send(websocket.NewErrMessage(err), conn)
-		//		if err != nil {
-		//			srv.Errorf("single chat message send error: %s", err.Error())
-		//			return
-		//		}
-		//	}
-		//case constants.GroupChatType:
-		//
-		//}
+	}
+}
 
+func MarkRead(svc *svc.ServiceContext) websocket.HandlerFunc {
+	return func(srv *websocket.Server, conn *websocket.Conn, msg *websocket.Message) {
+		// todo: 已读未读处理
+		var data ws.MarkRead
+		if err := mapstructure.Decode(msg.Data, &data); err != nil {
+			err := srv.Send(websocket.NewErrMessage(err), conn)
+			if err != nil {
+				srv.Errorf("error message send error: %v", err)
+			}
+			return
+		}
+
+		err := svc.MsgReadTransferClient.Push(&mq.MsgMarkRead{
+			ChatType:       data.ChatType,
+			ConversationId: data.ConversationId,
+			SendId:         conn.Uid,
+			RecvId:         data.RecvId,
+			MsgIds:         data.MsgIds,
+		})
+		if err != nil {
+			err := srv.Send(websocket.NewErrMessage(err), conn)
+			if err != nil {
+				srv.Errorf("error message send error: %v", err)
+			}
+			return
+		}
 	}
 }

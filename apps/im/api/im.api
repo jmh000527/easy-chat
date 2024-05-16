@@ -31,6 +31,24 @@ type (
 		Unread         int32  `json:"unread,omitempty"`
 	}
 )
+type (
+	GetChatLogReadRecordsReq {
+		MsgId string `json:"msgId"`
+	}
+	GetChatLogReadRecordsResp {
+		Reads   []string `json:"reads"`
+		UnReads []string `json:"unReads"`
+	}
+)
+
+@server(
+	prefix: v1/im
+	jwt: JwtAuth
+)
+service im {
+	@handler getChatLogReadRecords
+	get /chatlog/readRecords(GetChatLogReadRecordsReq) returns(GetChatLogReadRecordsResp)
+}
 
 // -------------- im api v1 --------------
 

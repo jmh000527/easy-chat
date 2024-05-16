@@ -23,6 +23,15 @@ type Conversation struct {
 	Unread         int32  `json:"unread,omitempty"`
 }
 
+type GetChatLogReadRecordsReq struct {
+	MsgId string `json:"msgId"`
+}
+
+type GetChatLogReadRecordsResp struct {
+	Reads   []string `json:"reads"`
+	UnReads []string `json:"unReads"`
+}
+
 type ChatLogReq struct {
 	ConversationId string `json:"conversationId"`
 	StartSendTime  int64  `json:"startSendTime,omitempty"`
