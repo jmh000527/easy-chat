@@ -31,6 +31,8 @@ type (
 		FindOneByPhoneNumber(ctx context.Context, phone string) (*Users, error)
 		Update(ctx context.Context, data *Users) error
 		Delete(ctx context.Context, id string) error
+		ListByName(ctx context.Context, name string) ([]*Users, error)
+		ListByIds(ctx context.Context, ids []string) ([]*Users, error)
 	}
 
 	defaultUsersModel struct {
@@ -117,6 +119,30 @@ func (m *defaultUsersModel) Update(ctx context.Context, data *Users) error {
 		return conn.ExecCtx(ctx, query, data.Avatar, data.Nickname, data.Phone, data.Password, data.Status, data.Sex, data.Id)
 	}, usersIdKey)
 	return err
+}
+
+func (m *defaultUsersModel) ListByName(ctx context.Context, name string) ([]*Users, error) {
+	query := fmt.Sprintf("select %s from %s where `nickname` like ?", usersRows, m.table)
+	var resp []*Users
+	err := m.QueryRowsNoCacheCtx(ctx, &resp, query, name)
+	switch err {
+	case nil:
+		return resp, nil
+	default:
+		return nil, err
+	}
+}
+
+func (m *defaultUsersModel) ListByIds(ctx context.Context, ids []string) ([]*Users, error) {
+	query := fmt.Sprintf("select %s from %s where id in ('%s')", usersRows, m.table, strings.Join(ids, "','"))
+	var resp []*Users
+	err := m.QueryRowsNoCacheCtx(ctx, &resp, query)
+	switch err {
+	case nil:
+		return resp, nil
+	default:
+		return nil, err
+	}
 }
 
 func (m *defaultUsersModel) formatPrimary(primary any) string {

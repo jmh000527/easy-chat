@@ -5,7 +5,10 @@ go 1.20
 require (
 	github.com/edwingeng/wuid v1.0.0
 	github.com/golang-jwt/jwt/v4 v4.5.0
+	github.com/jinzhu/copier v0.4.0
+	github.com/pkg/errors v0.9.1
 	github.com/zeromicro/go-zero v1.6.4
+	github.com/zeromicro/x v0.0.0-20240408115609-8224c482b07e
 	golang.org/x/crypto v0.22.0
 	google.golang.org/grpc v1.63.2
 	google.golang.org/protobuf v1.33.0
