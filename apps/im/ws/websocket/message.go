@@ -27,7 +27,7 @@ const (
 type Message struct {
 	FrameType `json:"frameType"` // 帧类型
 	Id        string             `json:"id"`       // 消息 ID
-	AckSeq    int                `json:"ackSeq"`   // 确认序列号
+	AckSeq    int                `json:"ackSeq"`   // Ack序列号
 	ackTime   time.Time          `json:"ackTime"`  // 确认时间
 	errCount  int                `json:"errCount"` // 错误计数
 	Method    string             `json:"method"`   // 方法

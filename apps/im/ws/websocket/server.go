@@ -8,6 +8,7 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 	"net/http"
 	"sync"
+	"time"
 )
 
 type Server struct {
@@ -25,11 +26,145 @@ type Server struct {
 	authentication Authentication
 }
 
+// 判断当前消息是否进行Ack确认
+func (s *Server) isAck(message *Message) bool {
+	if message == nil {
+		return s.opt.ack != NoAck
+	}
+	return s.opt.ack != NoAck && message.FrameType != FrameNoAck
+}
+
+// ACK确认后任务的处理
+func (s *Server) handleWrite(conn *Conn) {
+	for {
+		select {
+		case <-conn.done:
+			// 连接关闭
+			return
+		case message := <-conn.message:
+			// 根据请求消息分发路由执行
+			switch message.FrameType {
+			case FramePing:
+				s.Send(&Message{
+					FrameType: FramePing,
+				}, conn)
+			case FrameData:
+				if handler, ok := s.routes[message.Method]; ok {
+					handler(s, conn, message)
+				}
+			}
+
+			// 清除消息确认
+			if s.isAck(message) {
+				conn.messageMu.Lock()
+				delete(conn.readMessageSeq, message.Id)
+				conn.messageMu.Unlock()
+			}
+		}
+	}
+
+}
+
+// 读取ACK确认
+func (s *Server) readAck(conn *Conn) {
+	for {
+		select {
+		case <-conn.done:
+			// 连接关闭
+			s.Infof("close message ack uid: %v ", conn.Uid)
+			return
+		default:
+		}
+
+		// 从队列中读取新的消息
+		conn.messageMu.Lock()
+		// 当前队列中没有消息
+		if len(conn.readMessage) == 0 {
+			conn.messageMu.Unlock()
+			// 增加睡眠，让任务更好地切换
+			time.Sleep(100 * time.Microsecond)
+			continue
+		}
+
+		// 读取第一条消息
+		message := conn.readMessage[0]
+
+		// 判断Ack方式
+		switch s.opt.ack {
+		// 只需要一次确认
+		case OnlyAck:
+			// 直接给客户端回复
+			s.Send(&Message{
+				FrameType: FrameAck,
+				Id:        message.Id,
+				AckSeq:    message.AckSeq + 1,
+			}, conn)
+			// 进行业务处理
+			// 把消息从队列中移除
+			conn.readMessage = conn.readMessage[1:]
+			conn.messageMu.Unlock()
+
+			conn.message <- message
+		case RigorAck:
+			// 先回
+			if message.AckSeq == 0 {
+				// 还未确认
+				conn.readMessage[0].AckSeq++
+				conn.readMessage[0].ackTime = time.Now()
+				s.Send(&Message{
+					FrameType: FrameAck,
+					Id:        message.Id,
+					AckSeq:    message.AckSeq,
+				}, conn)
+				s.Infof("message ack RigorAck send mid: %v, seq: %v , time: %v", message.Id, message.AckSeq,
+					message.ackTime)
+				conn.messageMu.Unlock()
+				continue
+			}
+
+			// 验证
+			// 1. 客户端返回结果，再一次确认
+			// 获取之前记录的Ack信息，得到客户端的序号
+			msgSeq := conn.readMessageSeq[message.Id]
+			if msgSeq.AckSeq > message.AckSeq {
+				// 客户端进行了确认
+				// 删除消息
+				conn.readMessage = conn.readMessage[1:]
+				conn.messageMu.Unlock()
+
+				conn.message <- message
+				s.Infof("message ack RigorAck success mid: %v", message.Id)
+				continue
+			}
+
+			// 2. 客户端没有确认，考虑是否超过了ack的确认时间
+			val := s.opt.ackTimeout - time.Since(message.ackTime)
+			if !message.ackTime.IsZero() && val <= 0 {
+				// 2.1 超过结束确认
+				// 删除消息序号
+				delete(conn.readMessageSeq, message.Id)
+				// 删除消息
+				conn.readMessage = conn.readMessage[1:]
+				conn.messageMu.Unlock()
+				continue
+			}
+			// 2.2 未超时，重新发送
+			conn.messageMu.Unlock()
+			s.Send(&Message{
+				FrameType: FrameAck,
+				Id:        message.Id,
+				AckSeq:    message.AckSeq,
+			}, conn)
+			// 睡眠一定的时间
+			time.Sleep(3 * time.Second)
+		}
+	}
+}
+
 func (s *Server) SendByUserIds(msg interface{}, sendIds ...string) error {
 	if len(sendIds) == 0 {
 		return nil
 	}
-
 	return s.Send(msg, s.GetConns(sendIds...)...)
 }
 
@@ -55,7 +190,6 @@ func (s *Server) Send(msg interface{}, conns ...*Conn) error {
 func (s *Server) GetConn(uid string) *Conn {
 	s.RWMutex.Lock()
 	defer s.RWMutex.Unlock()
-
 	return s.userToConn[uid]
 }
 
@@ -133,6 +267,14 @@ func (s *Server) handlerConn(conn *Conn) {
 	uids := s.GetUsers(conn)
 	conn.Uid = uids[0]
 
+	// 处理任务
+	go s.handleWrite(conn)
+	// 判断是否开启Ack机制
+	if s.isAck(nil) {
+		// 进行Ack确认
+		go s.readAck(conn)
+	}
+
 	for {
 		// 获取请求消息
 		_, msg, err := conn.ReadMessage()
@@ -141,7 +283,6 @@ func (s *Server) handlerConn(conn *Conn) {
 			s.Close(conn)
 			return
 		}
-
 		// 解析消息
 		var message Message
 		if err = json.Unmarshal(msg, &message); err != nil {
@@ -150,16 +291,16 @@ func (s *Server) handlerConn(conn *Conn) {
 			return
 		}
 
-		// 根据请求消息分发路由执行
-		switch message.FrameType {
-		case FramePing:
-			s.Send(&Message{
-				FrameType: FramePing,
-			}, conn)
-		case FrameData:
-			if handler, ok := s.routes[message.Method]; ok {
-				handler(s, conn, &message)
-			}
+		// todo: 给客户端回复一个ACK
+
+		// 启动了Ack机制且消息类型需要进行Ack确认
+		if s.isAck(&message) {
+			// 进行Ack确认
+			s.Infof("conn message read ack msg: %v", message)
+			conn.appendMsgMq(&message)
+		} else {
+			// 直接传递消息，不进行Ack确认
+			conn.message <- &message
 		}
 	}
 }
@@ -176,23 +317,19 @@ func (s *Server) ServerWs(w http.ResponseWriter, r *http.Request) {
 			s.Errorf("server handler ws recover err: %v", r)
 		}
 	}()
-
 	// 获取一个websocket连接对象
 	conn := NewConn(s, w, r)
 	if conn == nil {
 		return
 	}
-
 	//鉴权
 	if !s.authentication.Authenticate(w, r) {
 		s.Send(&Message{FrameType: FrameData, Data: fmt.Sprint("不具备访问权限")}, conn)
 		conn.Close()
 		return
 	}
-
 	// 记录连接
 	s.addConn(conn, r)
-
 	// 根据连接对象获取请求信息
 	go s.handlerConn(conn)
 }

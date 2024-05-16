@@ -9,13 +9,48 @@ import (
 
 // Conn 表示 WebSocket 连接。
 type Conn struct {
-	idleMu            sync.Mutex      // 用于保护空闲时间的互斥锁。
-	Uid               string          // 连接的唯一标识符。
-	wsConn            *websocket.Conn // 底层的 WebSocket 连接。
-	s                 *Server         // 与该连接关联的 WebSocket 服务器。
-	idle              time.Time       // 上次活动时间。
-	maxConnectionIdle time.Duration   // 最大连接空闲时间。
-	done              chan struct{}   // 关闭信号通道。
+	idleMu sync.Mutex
+	Uid    string
+	wsConn *websocket.Conn
+	s      *Server
+
+	idle              time.Time
+	maxConnectionIdle time.Duration
+
+	messageMu      sync.Mutex
+	readMessage    []*Message          // 读消息队列
+	readMessageSeq map[string]*Message // 读消息队列序列化
+
+	message chan *Message
+	done    chan struct{}
+}
+
+func (c *Conn) appendMsgMq(msg *Message) {
+	c.messageMu.Lock()
+	defer c.messageMu.Unlock()
+	// 读队列中，判断之前是否在队列中存过消息
+	if m, ok := c.readMessageSeq[msg.Id]; ok {
+		// 该消息已经有Ack的确认过程
+		if len(c.readMessage) == 0 {
+			// 队列中没有该消息
+			return
+		}
+		// 要求 msg.AckSeq > m.AckSeq
+		if msg.AckSeq <= m.AckSeq {
+			// 没有进行ack的确认, 重复
+			return
+		}
+		// 更新最新的消息
+		c.readMessageSeq[msg.Id] = msg
+		return
+	}
+	// 还没有进行Ack确认，避免客户端重复发送多余的Ack消息
+	if msg.FrameType == FrameAck {
+		return
+	}
+	// 记录消息
+	c.readMessage = append(c.readMessage, msg)
+	c.readMessageSeq[msg.Id] = msg
 }
 
 // Close 关闭 WebSocket 连接。
@@ -87,16 +122,16 @@ func NewConn(s *Server, w http.ResponseWriter, r *http.Request) *Conn {
 		s.Errorf("Error upgrading connection: %s", err)
 		return nil
 	}
-
 	conn := &Conn{
 		wsConn:            c,
 		s:                 s,
 		idle:              time.Now(),
 		maxConnectionIdle: s.opt.maxConnectionIdle,
+		readMessage:       make([]*Message, 0, 2),
+		readMessageSeq:    make(map[string]*Message, 2),
+		message:           make(chan *Message, 1),
 		done:              make(chan struct{}),
 	}
-
-	//go conn.keepalive()
-
+	go conn.keepalive()
 	return conn
 }

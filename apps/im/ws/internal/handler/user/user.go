@@ -10,6 +10,6 @@ func OnLine(svc *svc.ServiceContext) websocket.HandlerFunc {
 		uids := srv.GetUsers()
 		u := srv.GetUsers(conn)
 		err := srv.Send(websocket.NewMessage(u[0], uids), conn)
-		srv.Info("err ", err)
+		srv.Info("err: ", err)
 	}
 }
