@@ -183,14 +183,16 @@ func (s *Server) readAck(conn *Conn) {
 			// 2.2 未超时，重新发送
 			conn.messageMu.Unlock()
 			if val > 0 && val > 300*time.Microsecond {
-				s.Send(&Message{
+				if err := send(&Message{
 					FrameType: FrameAck,
 					Id:        message.Id,
 					AckSeq:    message.AckSeq,
-				}, conn)
-				// 睡眠一定的时间
-				time.Sleep(300 * time.Microsecond)
+				}, conn); err != nil {
+					continue
+				}
 			}
+			// 睡眠一定的时间
+			time.Sleep(300 * time.Microsecond)
 		}
 	}
 }
@@ -374,7 +376,7 @@ func (s *Server) Start() {
 }
 
 func (s *Server) Stop() {
-	fmt.Println("停止服务")
+	fmt.Println("stop service")
 }
 
 func NewServer(addr string, opts ...ServerOptions) *Server {
