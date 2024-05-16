@@ -14,5 +14,5 @@ Cache:
     Pass: easy-chat
 
 Jwt:
-  AccessSecret: jmh
+  AccessSecret: github/jmh000527
   AccessExpire: 8640000

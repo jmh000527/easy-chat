@@ -2,7 +2,7 @@ package ctxdata
 
 import "github.com/golang-jwt/jwt/v4"
 
-const Identity = "jmh"
+const Identity = "github/jmh000527"
 
 func GetJwtToken(secretKey string, iat, seconds int64, uid string) (string, error) {
 	claims := make(jwt.MapClaims)

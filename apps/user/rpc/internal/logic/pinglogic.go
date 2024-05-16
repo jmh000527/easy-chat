@@ -25,6 +25,6 @@ func NewPingLogic(ctx context.Context, svcCtx *svc.ServiceContext) *PingLogic {
 
 func (l *PingLogic) Ping(in *user.Request) (*user.Response, error) {
 	return &user.Response{
-		Pong: "jmh",
+		Pong: "github/jmh000527",
 	}, nil
 }
