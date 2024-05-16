@@ -17,7 +17,7 @@ import (
 )
 
 var (
-	ErrPhoneIsRegister = errors.New("手机号已经注册过")
+	ErrPhoneIsRegistered = errors.New("手机号已经注册过")
 )
 
 type RegisterLogic struct {
@@ -42,7 +42,7 @@ func (l *RegisterLogic) Register(in *user.RegisterReq) (*user.RegisterResp, erro
 	}
 
 	if userEntity != nil {
-		return nil, ErrPhoneIsRegister
+		return nil, ErrPhoneIsRegistered
 	}
 
 	// 定义用户数据
