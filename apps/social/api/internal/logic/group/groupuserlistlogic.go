@@ -38,7 +38,9 @@ func (l *GroupUserListLogic) GroupUserList(req *types.GroupUserListReq) (resp *t
 	}
 
 	// 获取用户信息
-	userList, err := l.svcCtx.User.FindUser(l.ctx, &userclient.FindUserReq{Ids: uids})
+	userList, err := l.svcCtx.User.FindUser(l.ctx, &userclient.FindUserReq{
+		Ids: uids,
+	})
 	if err != nil {
 		return nil, err
 	}
