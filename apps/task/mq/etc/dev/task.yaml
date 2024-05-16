@@ -21,7 +21,7 @@ MsgReadTransfer:
 
 MsgReadHandler:
   GroupMsgReadHandler: 1
-  GroupMsgReadRecordDelayTime: 2
+  GroupMsgReadRecordDelayTime: 5
   GroupMsgReadRecordDelayCount: 2
 
 Redisx:
