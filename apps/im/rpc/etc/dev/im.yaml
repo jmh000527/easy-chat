@@ -1,5 +1,5 @@
 Name: im.rpc
-ListenOn: 127.0.0.1:8080
+ListenOn: 0.0.0.0:10002
 Etcd:
   Hosts:
     - 192.168.199.138:3379
