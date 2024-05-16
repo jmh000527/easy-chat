@@ -13,7 +13,8 @@ type Config struct {
 	MsgChatTransfer kq.KqConf
 
 	Redisx redis.RedisConf
-	Mongo  struct {
+
+	Mongo struct {
 		Url string
 		Db  string
 	}
