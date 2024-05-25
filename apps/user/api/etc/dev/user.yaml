@@ -2,6 +2,11 @@ Name: user
 Host: 0.0.0.0
 Port: 8888
 
+Redisx:
+  Host: 192.168.199.138:16379
+  Type: node
+  Pass: easy-chat
+
 UserRpc:
   Etcd:
     Hosts:

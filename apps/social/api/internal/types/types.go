@@ -134,3 +134,18 @@ type GroupUserListReq struct {
 type GroupUserListResp struct {
 	List []*GroupMembers `json:"List,omitempty"`
 }
+
+type FriendsOnlineReq struct {
+}
+
+type FriendsOnlineResp struct {
+	OnlineList map[string]bool `json:"onLineList"`
+}
+
+type GroupUserOnlineReq struct {
+	GroupId string `json:"group_id,omitempty"`
+}
+
+type GroupUserOnlineResp struct {
+	OnlineList map[string]bool `json:"onLineList"`
+}
