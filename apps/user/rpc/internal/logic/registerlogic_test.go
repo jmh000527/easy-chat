@@ -28,6 +28,18 @@ func TestRegisterLogic_Register(t *testing.T) {
 			wantPrint: true,
 			wantErr:   false,
 		},
+		{
+			name: "1",
+			args: args{in: &user.RegisterReq{
+				Phone:    "13333333333",
+				Nickname: "张三",
+				Password: "123456",
+				Avatar:   "png.jpg",
+				Sex:      1,
+			}},
+			wantPrint: true,
+			wantErr:   false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
