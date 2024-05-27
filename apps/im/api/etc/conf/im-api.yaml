@@ -1,0 +1,20 @@
+host: 0.0.0.0
+imrpc:
+    etcd:
+        hosts:
+            - 192.168.199.138:3379
+        key: im.rpc
+jwtauth:
+    accesssecret: github/jmh000527
+name: im
+port: 8882
+socialrpc:
+    etcd:
+        hosts:
+            - 192.168.199.138:3379
+        key: social.rpc
+userrpc:
+    etcd:
+        hosts:
+            - 192.168.199.138:3379
+        key: user.rpc

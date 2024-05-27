@@ -4,6 +4,7 @@ import (
 	"context"
 	"easy-chat/apps/user/rpc/user"
 	"easy-chat/pkg/constants"
+	"fmt"
 	"github.com/jinzhu/copier"
 
 	"easy-chat/apps/user/api/internal/svc"
@@ -27,6 +28,9 @@ func NewLoginLogic(ctx context.Context, svcCtx *svc.ServiceContext) *LoginLogic 
 }
 
 func (l *LoginLogic) Login(req *types.LoginReq) (resp *types.LoginResp, err error) {
+	// 测试服务器平滑重启
+	fmt.Println(l.svcCtx.Config.Database)
+
 	loginResp, err := l.svcCtx.User.Login(l.ctx, &user.LoginReq{
 		Phone:    req.Phone,
 		Password: req.Password,

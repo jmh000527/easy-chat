@@ -1,0 +1,15 @@
+jwtauth:
+    accesssecret: github/jmh000527
+listenon: 0.0.0.0:10090
+mongo:
+    db: easy-chat
+    url: mongodb://root:easy-chat@192.168.199.138:47017
+msgchattransfer:
+    addrs:
+        - 192.168.199.138:9092
+    topic: msgChatTransfer
+msgreadtransfer:
+    addrs:
+        - 192.168.199.138:9092
+    topic: msgReadTransfer
+name: im.ws

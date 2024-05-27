@@ -22,32 +22,53 @@ type Sail struct {
 }
 
 func NewSail(cfg *Config) *Sail {
-	s := sail.New(&sail.MetaConfig{
-		ETCDEndpoints:  cfg.ETCDEndpoints,  // Etcd 端点
-		ProjectKey:     cfg.ProjectKey,     // 项目密钥
-		Namespace:      cfg.Namespace,      // Etcd 命名空间
-		Configs:        cfg.Configs,        // 配置文件名
-		ConfigFilePath: cfg.ConfigFilePath, // 配置文件路径（先删除再加载）
-		LogLevel:       cfg.LogLevel,       // 日志级别
-	})
 	return &Sail{
-		Sail: s,
+		c: cfg,
 	}
+}
+
+func (s *Sail) Build() error {
+	var opts []sail.Option
+	if s.OnConfigChange != nil {
+		opts = append(opts, sail.WithOnConfigChange(s.OnConfigChange))
+	}
+	s.Sail = sail.New(&sail.MetaConfig{
+		ETCDEndpoints:  s.c.ETCDEndpoints,  // Etcd 端点
+		ProjectKey:     s.c.ProjectKey,     // 项目密钥
+		Namespace:      s.c.Namespace,      // Etcd 命名空间
+		Configs:        s.c.Configs,        // 配置文件名
+		ConfigFilePath: s.c.ConfigFilePath, // 配置文件路径（先删除再加载）
+		LogLevel:       s.c.LogLevel,       // 日志级别
+	}, opts...)
+	return s.Sail.Err()
 }
 
 func (s *Sail) FromJsonBytes() ([]byte, error) {
 	if err := s.Pull(); err != nil {
 		return nil, err
 	}
-	v, err := s.MergeVipers()
+	return s.fromJsonBytes(s.Sail)
+}
+
+func (s *Sail) fromJsonBytes(sail *sail.Sail) ([]byte, error) {
+	v, err := sail.MergeVipers()
 	if err != nil {
-		fmt.Println(err)
 		return nil, err
 	}
 	data := v.AllSettings()
 	return json.Marshal(data)
 }
 
-func (s *Sail) Error() error {
-	return s.Err()
+func (s *Sail) SetOnChange(f OnChange) {
+	// 设置热加载方法
+	s.OnConfigChange = func(configFileKey string, sail *sail.Sail) {
+		data, err := s.fromJsonBytes(sail)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		if err = f(data); err != nil {
+			fmt.Println("OnChange err: ", err)
+		}
+	}
 }

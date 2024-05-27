@@ -1,0 +1,24 @@
+host: 0.0.0.0
+imrpc:
+    etcd:
+        hosts:
+            - 192.168.199.138:3379
+        key: im.rpc
+jwtauth:
+    accesssecret: github/jmh000527
+name: social
+port: 8881
+redisx:
+    host: 192.168.199.138:16379
+    pass: easy-chat
+    type: node
+socialrpc:
+    etcd:
+        hosts:
+            - 192.168.199.138:3379
+        key: social.rpc
+userrpc:
+    etcd:
+        hosts:
+            - 192.168.199.138:3379
+        key: user.rpc
