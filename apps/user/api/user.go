@@ -31,7 +31,7 @@ func main() {
 		ProjectKey:     "98c6f2c2287f4c73cea3d40ae7ec3ff2", // 项目密钥
 		Namespace:      "user",                             // Etcd 命名空间
 		Configs:        "user-api.yaml",                    // 配置文件名
-		ConfigFilePath: "./etc/conf",                       // 配置文件路径（先删除再加载）
+		ConfigFilePath: "/user/conf",                       // 配置文件路径（先删除再加载）
 		LogLevel:       "DEBUG",                            // 日志级别
 	})).MustLoad(&c, func(bytes []byte) error {
 		var c config.Config

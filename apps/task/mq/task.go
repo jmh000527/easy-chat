@@ -24,7 +24,7 @@ func main() {
 		ProjectKey:     "98c6f2c2287f4c73cea3d40ae7ec3ff2",
 		Namespace:      "task",
 		Configs:        "task-mq.yaml",
-		ConfigFilePath: "./etc/conf",
+		ConfigFilePath: "/task/conf",
 		LogLevel:       "DEBUG",
 	})).MustLoad(&c, func(bytes []byte) error {
 		var c config.Config
@@ -68,6 +68,6 @@ func Run(c config.Config) {
 	for _, s := range listen.Services() {
 		serviceGroup.Add(s)
 	}
-	fmt.Println("Starting mqueue at ...")
+	fmt.Println("start mqueue server at ", c.ListenOn, " ..... ")
 	serviceGroup.Start()
 }

@@ -32,7 +32,7 @@ func main() {
 		ProjectKey:     "98c6f2c2287f4c73cea3d40ae7ec3ff2",
 		Namespace:      "social",
 		Configs:        "social-rpc.yaml",
-		ConfigFilePath: "./etc/conf",
+		ConfigFilePath: "/social/conf",
 		LogLevel:       "DEBUG",
 	})).MustLoad(&c, func(bytes []byte) error {
 		var c config.Config
