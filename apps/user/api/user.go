@@ -67,7 +67,7 @@ func main() {
 }
 
 func Run(c config.Config) {
-	server := rest.MustNewServer(c.RestConf)
+	server := rest.MustNewServer(c.RestConf, rest.WithCors())
 	defer server.Stop()
 
 	ctx := svc.NewServiceContext(c)

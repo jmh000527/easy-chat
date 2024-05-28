@@ -17,8 +17,8 @@ type JwtAuth struct {
 }
 
 func (j *JwtAuth) Authenticate(w http.ResponseWriter, r *http.Request) bool {
-	if token := r.Header.Get("sec-websocket-protocol"); token != "" {
-		r.Header.Set("Authorization", token)
+	if t := r.Header.Get("sec-websocket-protocol"); t != "" {
+		r.Header.Set("Authorization", t)
 	}
 	tok, err := j.parser.ParseToken(r, j.svc.Config.JwtAuth.AccessSecret, "")
 	if err != nil {
