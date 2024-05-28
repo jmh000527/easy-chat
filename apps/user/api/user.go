@@ -32,7 +32,8 @@ func main() {
 		Namespace:      "user",                             // Etcd 命名空间
 		Configs:        "user-api.yaml",                    // 配置文件名
 		ConfigFilePath: "/user/conf",                       // 配置文件路径（先删除再加载）
-		LogLevel:       "DEBUG",                            // 日志级别
+		//ConfigFilePath: "./etc/conf", // 配置文件路径（先删除再加载）
+		LogLevel: "DEBUG", // 日志级别
 	})).MustLoad(&c, func(bytes []byte) error {
 		var c config.Config
 		err := configserver.LoadFromJsonBytes(bytes, &c)
@@ -43,6 +44,7 @@ func main() {
 		log.Println("load config success, config info:", c)
 		// 停止接受请求
 		proc.WrapUp()
+		//proc.Shutdown()
 		// 另外启动一个服务
 		wg.Add(1)
 		go func(c config.Config) {
