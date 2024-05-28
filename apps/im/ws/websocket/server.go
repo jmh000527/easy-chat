@@ -385,11 +385,15 @@ func NewServer(addr string, opts ...ServerOptions) *Server {
 	opt := newWebsocketServerOption(opts...)
 
 	return &Server{
-		routes:         make(map[string]HandlerFunc),
-		addr:           addr,
-		patten:         opt.patten,
-		opt:            &opt,
-		upgrader:       websocket.Upgrader{},
+		routes: make(map[string]HandlerFunc),
+		addr:   addr,
+		patten: opt.patten,
+		opt:    &opt,
+		upgrader: websocket.Upgrader{
+			CheckOrigin: func(r *http.Request) bool {
+				return true
+			},
+		},
 		Logger:         logx.WithContext(context.Background()),
 		connToUser:     make(map[*Conn]string),
 		userToConn:     make(map[string]*Conn),

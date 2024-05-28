@@ -13,6 +13,7 @@ type MsgChatTransfer struct {
 
 	constants.MType `json:"mType"`
 	Content         string `json:"content"`
+	MsgId           string `json:"msgId"`
 }
 
 // MsgMarkRead 处理已读消息

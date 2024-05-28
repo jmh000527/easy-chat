@@ -34,7 +34,7 @@ func (m *MsgChatTransfer) Consume(key, value string) error {
 	}
 
 	return m.Transfer(ctx, &ws.Push{
-		MsgId:          msgId.Hex(),
+		MsgId:          data.MsgId,
 		ConversationId: data.ConversationId,
 		ChatType:       data.ChatType,
 		SendId:         data.SendId,

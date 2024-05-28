@@ -36,6 +36,7 @@ type (
     LoginResp {
         Token string `json:"token"`
         Expire int64 `json:"expire"`
+        User    User   `json:"json"`
     }
 )
 
