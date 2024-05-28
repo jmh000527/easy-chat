@@ -32,6 +32,7 @@ message LoginResp {
   string Token = 1;
   int64 expire = 2;
   string id = 3;
+  UserEntity user=4;
 }
 
 message RegisterReq{

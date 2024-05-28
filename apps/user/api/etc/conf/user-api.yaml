@@ -1,4 +1,4 @@
-database: mysql123
+database: mysql
 host: 0.0.0.0
 jwtauth:
     accessexpire: 8640000

@@ -43,7 +43,6 @@ func (l *LoginLogic) Login(in *user.LoginReq) (*user.LoginResp, error) {
 		}
 		return nil, errors.Wrapf(xerr.NewDBErr(), "find user by phone err: %v, req %v", err, in.Phone)
 	}
-
 	// 密码验证
 	if !encrypt.ValidatePasswordHash(in.Password, userEntity.Password.String) {
 		return nil, errors.WithStack(ErrUserPwdError)
@@ -60,5 +59,13 @@ func (l *LoginLogic) Login(in *user.LoginReq) (*user.LoginResp, error) {
 		Id:     userEntity.Id,
 		Token:  token,
 		Expire: now + l.svcCtx.Config.Jwt.AccessExpire,
+		User: &user.UserEntity{
+			Id:       userEntity.Id,
+			Avatar:   userEntity.Avatar,
+			Nickname: userEntity.Nickname,
+			Phone:    in.Phone,
+			Status:   int32(userEntity.Status.Int64),
+			Sex:      int32(userEntity.Sex.Int64),
+		},
 	}, nil
 }
