@@ -36,18 +36,21 @@ func NewRegisterLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Register
 
 func (l *RegisterLogic) Register(in *user.RegisterReq) (*user.RegisterResp, error) {
 	// 验证用户是否注册过
+	// 调用FindOneByPhoneNumber方法通过手机号查找用户，如果发生错误且错误不是models.ErrNotFound，返回错误
 	userEntity, err := l.svcCtx.UsersModel.FindOneByPhoneNumber(l.ctx, in.Phone)
 	if err != nil && !errors.Is(err, models.ErrNotFound) {
 		return nil, err
 	}
 
+	// 如果用户已经存在，返回ErrPhoneIsRegistered错误
 	if userEntity != nil {
 		return nil, ErrPhoneIsRegistered
 	}
 
 	// 定义用户数据
+	// 创建一个新的用户实体，并填充其数据
 	userEntity = &models.Users{
-		Id:       wuid.GenUid(l.svcCtx.Config.Mysql.Datasource),
+		Id:       wuid.GenUid(l.svcCtx.Config.Mysql.Datasource), // 生成唯一用户ID
 		Avatar:   in.Avatar,
 		Nickname: in.Nickname,
 		Phone:    in.Phone,
@@ -58,6 +61,7 @@ func (l *RegisterLogic) Register(in *user.RegisterReq) (*user.RegisterResp, erro
 	}
 
 	// 处理密码
+	// 如果输入的密码不为空，生成密码哈希并赋值给用户实体
 	if len(in.Password) > 0 {
 		genPassword, err := encrypt.GenPasswordHash([]byte(in.Password))
 		if err != nil {
@@ -70,18 +74,22 @@ func (l *RegisterLogic) Register(in *user.RegisterReq) (*user.RegisterResp, erro
 	}
 
 	// 新增用户
+	// 将用户实体插入数据库
 	_, err = l.svcCtx.UsersModel.Insert(l.ctx, userEntity)
 	if err != nil {
 		return nil, err
 	}
 
 	// 生成token
+	// 获取当前时间的Unix时间戳
 	now := time.Now().Unix()
+	// 调用GetJwtToken方法生成JWT令牌
 	token, err := ctxdata.GetJwtToken(l.svcCtx.Config.Jwt.AccessSecret, now, l.svcCtx.Config.Jwt.AccessExpire, userEntity.Id)
 	if err != nil {
 		return nil, err
 	}
 
+	// 返回注册响应，其中包含生成的token和过期时间
 	return &user.RegisterResp{
 		Token:  token,
 		Expire: now + l.svcCtx.Config.Jwt.AccessExpire,

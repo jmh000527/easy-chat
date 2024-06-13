@@ -36,25 +36,33 @@ func NewLoginLogic(ctx context.Context, svcCtx *svc.ServiceContext) *LoginLogic 
 
 func (l *LoginLogic) Login(in *user.LoginReq) (*user.LoginResp, error) {
 	// 验证用户是否注册过
+	// 调用FindOneByPhoneNumber方法通过手机号查找用户
 	userEntity, err := l.svcCtx.UsersModel.FindOneByPhoneNumber(l.ctx, in.Phone)
 	if err != nil {
+		// 如果用户不存在，返回ErrPhoneNotRegistered错误
 		if errors.Is(err, models.ErrNotFound) {
 			return nil, errors.WithStack(ErrPhoneNotRegistered)
 		}
+		// 其他错误，返回数据库错误
 		return nil, errors.Wrapf(xerr.NewDBErr(), "find user by phone err: %v, req %v", err, in.Phone)
 	}
+
 	// 密码验证
+	// 调用ValidatePasswordHash方法验证输入密码是否正确
 	if !encrypt.ValidatePasswordHash(in.Password, userEntity.Password.String) {
 		return nil, errors.WithStack(ErrUserPwdError)
 	}
 
 	// 生成token
+	// 获取当前时间的Unix时间戳
 	now := time.Now().Unix()
+	// 调用GetJwtToken方法生成JWT令牌
 	token, err := ctxdata.GetJwtToken(l.svcCtx.Config.Jwt.AccessSecret, now, l.svcCtx.Config.Jwt.AccessExpire, userEntity.Id)
 	if err != nil {
 		return nil, errors.Wrapf(xerr.NewDBErr(), "ctxdata get jwt token err: %v", err)
 	}
 
+	// 返回登录响应，其中包含用户ID、生成的token、过期时间和用户信息
 	return &user.LoginResp{
 		Id:     userEntity.Id,
 		Token:  token,

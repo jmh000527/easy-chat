@@ -25,7 +25,9 @@ func NewRegisterLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Register
 	}
 }
 
+// Register 处理用户注册请求
 func (l *RegisterLogic) Register(req *types.RegisterReq) (resp *types.RegisterResp, err error) {
+	// 调用 svcCtx 的 Register 方法进行用户注册
 	registerResp, err := l.svcCtx.Register(l.ctx, &user.RegisterReq{
 		Phone:    req.Phone,
 		Nickname: req.Nickname,
@@ -37,8 +39,12 @@ func (l *RegisterLogic) Register(req *types.RegisterReq) (resp *types.RegisterRe
 		return nil, err
 	}
 
+	// 将 user.RegisterResp 转换为 types.RegisterResp
 	var res types.RegisterResp
-	copier.Copy(&res, registerResp)
+	err = copier.Copy(&res, registerResp)
+	if err != nil {
+		return nil, err
+	}
 
 	return &res, nil
 }

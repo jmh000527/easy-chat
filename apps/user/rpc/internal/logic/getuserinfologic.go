@@ -28,17 +28,25 @@ func NewGetUserInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetUs
 	}
 }
 
+// GetUserInfo 获取用户信息
 func (l *GetUserInfoLogic) GetUserInfo(in *user.GetUserInfoReq) (*user.GetUserInfoResp, error) {
+	// 通过用户ID从数据库中查找用户信息
 	userEntity, err := l.svcCtx.UsersModel.FindOne(l.ctx, in.Id)
 	if err != nil {
+		// 处理用户不存在的情况
 		if errors.Is(err, models.ErrNotFound) {
 			return nil, ErrUserNotFound
 		}
 		return nil, err
 	}
-	var resp user.UserEntity
-	copier.Copy(&resp, userEntity)
 
+	// 将数据库中的用户实体复制到响应对象中
+	var resp user.UserEntity
+	if err := copier.Copy(&resp, userEntity); err != nil {
+		return nil, err
+	}
+
+	// 返回用户信息
 	return &user.GetUserInfoResp{
 		User: &resp,
 	}, nil

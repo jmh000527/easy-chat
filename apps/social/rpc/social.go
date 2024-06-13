@@ -2,6 +2,7 @@ package main
 
 import (
 	"easy-chat/pkg/configserver"
+	"easy-chat/pkg/interceptor"
 	"easy-chat/pkg/interceptor/rpcserver"
 	"flag"
 	"fmt"
@@ -82,7 +83,7 @@ func Run(c config.Config) {
 		}
 	})
 	s.AddUnaryInterceptors(rpcserver.LogInterceptor)
-	//s.AddUnaryInterceptors(interceptor.NewIdempotenceServer(interceptor.NewDefaultIdempotent(c.Cache[0].RedisConf)))
+	s.AddUnaryInterceptors(interceptor.NewIdempotenceServer(interceptor.NewDefaultIdempotent(c.Cache[0].RedisConf)))
 
 	defer s.Stop()
 

@@ -45,43 +45,46 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	)
 
 	server.AddRoutes(
-		[]rest.Route{
-			{
-				Method:  http.MethodPost,
-				Path:    "/group",
-				Handler: group.CreateGroupHandler(serverCtx),
-			},
-			{
-				Method:  http.MethodPost,
-				Path:    "/group/putIn",
-				Handler: group.GroupPutInHandler(serverCtx),
-			},
-			{
-				Method:  http.MethodPut,
-				Path:    "/group/putIn",
-				Handler: group.GroupPutInHandleHandler(serverCtx),
-			},
-			{
-				Method:  http.MethodGet,
-				Path:    "/group/putIns",
-				Handler: group.GroupPutInListHandler(serverCtx),
-			},
-			{
-				Method:  http.MethodGet,
-				Path:    "/groups",
-				Handler: group.GroupListHandler(serverCtx),
-			},
-			{
-				Method:  http.MethodGet,
-				Path:    "/group/users",
-				Handler: group.GroupUserListHandler(serverCtx),
-			},
-			{
-				Method:  http.MethodGet,
-				Path:    "/group/users/online",
-				Handler: group.GroupUserOnlineHandler(serverCtx),
-			},
-		},
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.IdempotenceMiddleware},
+			[]rest.Route{
+				{
+					Method:  http.MethodPost,
+					Path:    "/group",
+					Handler: group.CreateGroupHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPost,
+					Path:    "/group/putIn",
+					Handler: group.GroupPutInHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPut,
+					Path:    "/group/putIn",
+					Handler: group.GroupPutInHandleHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodGet,
+					Path:    "/group/putIns",
+					Handler: group.GroupPutInListHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodGet,
+					Path:    "/groups",
+					Handler: group.GroupListHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodGet,
+					Path:    "/group/users",
+					Handler: group.GroupUserListHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodGet,
+					Path:    "/group/users/online",
+					Handler: group.GroupUserOnlineHandler(serverCtx),
+				},
+			}...,
+		),
 		rest.WithJwt(serverCtx.Config.JwtAuth.AccessSecret),
 		rest.WithPrefix("/v1/social"),
 	)
