@@ -82,8 +82,12 @@ func Run(c config.Config) {
 			reflection.Register(grpcServer)
 		}
 	})
+
+	// 为gRPC服务添加一元拦截器，以增强服务的功能和性能。
+	// 这里分别添加了日志拦截器、幂等性拦截器和同步限流拦截器。
 	s.AddUnaryInterceptors(rpcserver.LogInterceptor)
 	s.AddUnaryInterceptors(interceptor.NewIdempotenceServer(interceptor.NewDefaultIdempotent(c.Cache[0].RedisConf)))
+	s.AddUnaryInterceptors(rpcserver.SyncXLimitInterceptor(100))
 
 	defer s.Stop()
 

@@ -18,10 +18,12 @@ type ServiceContext struct {
 	Config config.Config // 全局配置
 
 	IdempotenceMiddleware rest.Middleware
-	socialclient.Social   // 社交服务客户端
-	userclient.User       // 用户服务客户端
-	imclient.Im           // 即时通讯服务客户端
-	*redis.Redis          // Redis 客户端
+	LimitMiddleware       rest.Middleware
+
+	socialclient.Social // 社交服务客户端
+	userclient.User     // 用户服务客户端
+	imclient.Im         // 即时通讯服务客户端
+	*redis.Redis        // Redis 客户端
 }
 
 // retryPolicy 定义了 gRPC 客户端的重试策略
@@ -55,7 +57,9 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		Im: imclient.NewIm(
 			zrpc.MustNewClient(c.ImRpc),
 		),
-		Redis:                 redis.MustNewRedis(c.Redisx),
+		Redis: redis.MustNewRedis(c.Redisx),
+
 		IdempotenceMiddleware: middleware.NewIdempotenceMiddleware().Handler,
+		LimitMiddleware:       middleware.NewLimitMiddleware(c.Redisx).TokenLimitHandler(100, 100),
 	}
 }

@@ -17,6 +17,7 @@ import (
 )
 
 var (
+	// ErrPhoneIsRegistered 表示尝试注册一个已经注册过的手机号的错误。
 	ErrPhoneIsRegistered = errors.New("手机号已经注册过")
 )
 
@@ -47,7 +48,6 @@ func (l *RegisterLogic) Register(in *user.RegisterReq) (*user.RegisterResp, erro
 		return nil, ErrPhoneIsRegistered
 	}
 
-	// 定义用户数据
 	// 创建一个新的用户实体，并填充其数据
 	userEntity = &models.Users{
 		Id:       wuid.GenUid(l.svcCtx.Config.Mysql.Datasource), // 生成唯一用户ID
@@ -60,7 +60,6 @@ func (l *RegisterLogic) Register(in *user.RegisterReq) (*user.RegisterResp, erro
 		},
 	}
 
-	// 处理密码
 	// 如果输入的密码不为空，生成密码哈希并赋值给用户实体
 	if len(in.Password) > 0 {
 		genPassword, err := encrypt.GenPasswordHash([]byte(in.Password))
@@ -73,7 +72,6 @@ func (l *RegisterLogic) Register(in *user.RegisterReq) (*user.RegisterResp, erro
 		}
 	}
 
-	// 新增用户
 	// 将用户实体插入数据库
 	_, err = l.svcCtx.UsersModel.Insert(l.ctx, userEntity)
 	if err != nil {
