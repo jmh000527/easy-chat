@@ -10,7 +10,12 @@ import (
 	"github.com/zeromicro/go-zero/rest"
 )
 
+// RegisterHandlers 在给定的REST服务器上注册用户相关的处理程序。
+// 这个函数负责添加登录、注册以及用户详情查询的路由。
+// 参数server是指向rest.Server的指针，用于添加路由。
+// 参数serverCtx是服务上下文指针，提供了访问服务相关资源的能力，如配置信息等。
 func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
+	// 添加登录和注册路由，这些路由不需要JWT认证。
 	server.AddRoutes(
 		[]rest.Route{
 			{
@@ -27,6 +32,7 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 		rest.WithPrefix("/v1/user"),
 	)
 
+	// 添加用户详情查询路由，该路由需要JWT认证。
 	server.AddRoutes(
 		[]rest.Route{
 			{

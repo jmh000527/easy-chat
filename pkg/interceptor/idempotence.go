@@ -25,7 +25,11 @@ var (
 	DKey = "easy-chat-idempotence-dispatch-key" // 设置rpc调度中rpc请求的标识
 )
 
+// ContextWithVal 函数将一个新的唯一UUID添加到传入的context中，并返回新的context。
+// ctx是传入的context，TKey是context中存储UUID的键。
+// 返回值是新的context，包含新生成的UUID。
 func ContextWithVal(ctx context.Context) context.Context {
+	// 创建一个新的上下文，将请求的id设置为键值对中的值
 	// 设置请求的id
 	return context.WithValue(ctx, TKey, utils.NewUuid())
 }
@@ -50,7 +54,7 @@ func NewIdempotenceClient(idempotent Idempotent) grpc.UnaryClientInterceptor {
 	}
 }
 
-// NewIdempotenceServer 返回一个grpc.UnaryServerInterceptor类型的函数，用于实现gRPC请求的幂等性处理
+// NewIdempotenceServer 返回一个grpc服务端拦截器，用于实现gRPC请求的幂等性处理
 func NewIdempotenceServer(idempotent Idempotent) grpc.UnaryServerInterceptor {
 	// 返回一个grpc.UnaryServerInterceptor类型的函数，作为gRPC服务端拦截器
 	return func(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp any, err error) {

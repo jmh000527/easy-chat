@@ -66,16 +66,25 @@ func main() {
 	wg.Wait()
 }
 
+// Run 启动基于配置的RESTful API服务。
+// c: 包含服务配置信息的配置对象。
 func Run(c config.Config) {
+	// 初始化REST服务器，应用配置中的REST配置，并启用CORS。
 	server := rest.MustNewServer(c.RestConf, rest.WithCors())
+	// 确保服务器在函数返回前停止，以进行资源清理。
 	defer server.Stop()
 
+	// 创建服务上下文，传递配置信息。
 	ctx := svc.NewServiceContext(c)
+	// 注册服务处理程序，将服务器与业务逻辑连接起来。
 	handler.RegisterHandlers(server, ctx)
 
+	// 设置错误处理程序和成功处理程序，以统一处理HTTP请求的结果。
 	httpx.SetErrorHandlerCtx(resultx.ErrHandler(c.Name))
 	httpx.SetOkHandler(resultx.OkHandler)
 
+	// 输出启动信息，指示服务正在启动。
 	fmt.Printf("Starting server at %s:%d...\n", c.Host, c.Port)
+	// 启动服务器，开始监听HTTP请求。
 	server.Start()
 }
