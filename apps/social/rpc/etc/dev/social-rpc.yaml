@@ -12,3 +12,8 @@ Cache:
   - Host: 192.168.199.138:16379
     Type: node
     Pass: easy-chat
+
+Telemetry:
+  Name: social.rpc
+  Endpoint: http://192.168.199.138:14268/api/traces
+  Batcher: jaeger

@@ -12,7 +12,7 @@ import (
 	"sync"
 )
 
-var configFile = flag.String("f", "etc/dev/task.yaml", "the config file")
+var configFile = flag.String("f", "/task/conf/task-mq.yaml", "the config file")
 var wg sync.WaitGroup
 
 func main() {

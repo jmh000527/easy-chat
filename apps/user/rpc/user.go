@@ -19,7 +19,7 @@ import (
 	"google.golang.org/grpc"
 )
 
-var configFile = flag.String("f", "etc/dev/user.yaml", "the config file")
+var configFile = flag.String("f", "/user/conf/user.yaml", "the config file")
 
 var wg sync.WaitGroup
 
@@ -48,11 +48,11 @@ func main() {
 		log.Println("load config success, config info:", c)
 		// 停止接受请求
 		grpcServer.GracefulStop()
+
 		// 另外启动一个服务
 		wg.Add(1)
 		go func(c config.Config) {
 			defer wg.Done()
-
 			Run(c)
 		}(c)
 		return nil
@@ -64,7 +64,6 @@ func main() {
 	wg.Add(1)
 	go func(c config.Config) {
 		defer wg.Done()
-
 		Run(c)
 	}(c)
 

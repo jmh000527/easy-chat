@@ -22,7 +22,7 @@ RUN mkdir /$SERVER_NAME && mkdir /$SERVER_NAME/bin && mkdir /$SERVER_NAME/conf
 COPY ./bin/$SERVER_NAME-$SERVER_TYPE /$SERVER_NAME/bin/
 
 # 复制配置文件
-COPY ./apps/$SERVER_NAME/$SERVER_TYPE/etc/dev/$SERVER_NAME.yaml /$SERVER_NAME/conf/
+COPY ./apps/$SERVER_NAME/$SERVER_TYPE/etc/dev/${SERVER_NAME}-${SERVER_TYPE}.yaml /$SERVER_NAME/conf/
 
 # 为二进制提供执行权限
 RUN chmod +x /$SERVER_NAME/bin/$SERVER_NAME-$SERVER_TYPE

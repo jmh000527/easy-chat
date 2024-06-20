@@ -17,3 +17,8 @@ MsgReadTransfer:
   Topic: msgReadTransfer
   Addrs:
     - 192.168.199.138:9092
+
+Telemetry:
+  Name: im.ws
+  Endpoint: http://192.168.199.138:14268/api/traces
+  Batcher: jaeger

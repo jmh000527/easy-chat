@@ -19,7 +19,7 @@ import (
 	"google.golang.org/grpc/reflection"
 )
 
-var configFile = flag.String("f", "etc/dev/im.yaml", "the config file")
+var configFile = flag.String("f", "/im/conf/im-rpc.yaml", "the config file")
 var grpcServer *grpc.Server
 var wg sync.WaitGroup
 
@@ -42,6 +42,7 @@ func main() {
 			return err
 		}
 		log.Println("load config success, config info:", c)
+
 		// 停止接受请求
 		grpcServer.GracefulStop()
 		// 另外启动一个服务

@@ -39,13 +39,13 @@ func EnsureDirExists(dir string) error {
 	return nil
 }
 
-func main() {
-	// 定义相对目录路径
-	dir := "./etc/conf"
-
-	// 调用 EnsureDirExists 函数检查并创建目录
-	err := EnsureDirExists(dir)
-	if err != nil {
-		fmt.Printf("Error: %v\n", err)
-	}
-}
+//func main() {
+//	// 定义相对目录路径
+//	dir := "./etc/conf"
+//
+//	// 调用 EnsureDirExists 函数检查并创建目录
+//	err := EnsureDirExists(dir)
+//	if err != nil {
+//		fmt.Printf("Error: %v\n", err)
+//	}
+//}

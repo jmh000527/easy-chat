@@ -16,9 +16,12 @@ import (
 	"easy-chat/apps/user/api/internal/svc"
 )
 
-var configFile = flag.String("f", "etc/dev/user.yaml", "the config file")
+var configFile = flag.String("f", "/user/conf/user-api.yaml", "the config file")
 
 var wg sync.WaitGroup
+var mu sync.Mutex
+
+var signalChan = make(chan struct{})
 
 func main() {
 	flag.Parse()
@@ -42,13 +45,22 @@ func main() {
 			return err
 		}
 		log.Println("load config success, config info:", c)
+
 		// 停止接受请求
 		proc.WrapUp()
-		//proc.Shutdown()
+		proc.Shutdown()
+
+		// 等待任务完成
+		<-signalChan
+
 		// 另外启动一个服务
-		wg.Add(1)
 		go func(c config.Config) {
-			defer wg.Done()
+			defer func() {
+				wg.Add(1)
+				wg.Done()
+				// 发送信号通知任务完成
+				signalChan <- struct{}{}
+			}()
 			Run(c)
 		}(c)
 		return nil
@@ -56,10 +68,16 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	// 首次启动服务
 	wg.Add(1)
 	go func(c config.Config) {
-		defer wg.Done()
+		defer func() {
+			wg.Add(1)
+			wg.Done()
+			// 发送信号通知任务完成
+			signalChan <- struct{}{}
+		}()
 		Run(c)
 	}(c)
 

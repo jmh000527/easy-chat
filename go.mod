@@ -9,9 +9,11 @@ require (
 	github.com/gorilla/websocket v1.5.0
 	github.com/jinzhu/copier v0.4.0
 	github.com/mitchellh/mapstructure v1.5.0
+	github.com/opentracing/opentracing-go v1.2.0
 	github.com/pkg/errors v0.9.1
+	github.com/uber/jaeger-client-go v2.30.0+incompatible
 	github.com/zeromicro/go-queue v1.1.8
-	github.com/zeromicro/go-zero v1.6.5
+	github.com/zeromicro/go-zero v1.6.3
 	github.com/zeromicro/x v0.0.0-20240408115609-8224c482b07e
 	go.mongodb.org/mongo-driver v1.13.1
 	golang.org/x/crypto v0.23.0
@@ -22,6 +24,7 @@ require (
 require (
 	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/HYY-yu/seckill.pkg v1.3.4 // indirect
+	github.com/HdrHistogram/hdrhistogram-go v1.1.2 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cenkalti/backoff/v4 v4.2.1 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
@@ -78,6 +81,7 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/spf13/viper v1.13.0 // indirect
 	github.com/subosito/gotenv v1.4.1 // indirect
+	github.com/uber/jaeger-lib v2.4.1+incompatible // indirect
 	github.com/xdg-go/pbkdf2 v1.0.0 // indirect
 	github.com/xdg-go/scram v1.1.2 // indirect
 	github.com/xdg-go/stringprep v1.0.4 // indirect

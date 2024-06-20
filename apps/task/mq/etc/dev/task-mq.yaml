@@ -41,3 +41,8 @@ SocialRpc:
 
 Ws:
   Host: 192.168.199.138:10090
+
+Telemetry:
+  Name: task.mq
+  Endpoint: http://192.168.199.138:14268/api/traces
+  Batcher: jaeger

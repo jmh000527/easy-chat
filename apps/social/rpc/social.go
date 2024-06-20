@@ -20,7 +20,7 @@ import (
 	"google.golang.org/grpc/reflection"
 )
 
-var configFile = flag.String("f", "etc/dev/social.yaml", "the config file")
+var configFile = flag.String("f", "social/conf/social-rpc.yaml", "the config file")
 var grpcServer *grpc.Server
 var wg sync.WaitGroup
 
