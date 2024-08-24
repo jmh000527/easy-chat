@@ -35,15 +35,29 @@ func NewRegisterLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Register
 	}
 }
 
+// Register 处理用户注册请求。
+//
+// 功能描述:
+//   - 验证用户是否已经注册。
+//   - 如果用户未注册，创建一个新的用户并将其信息存入数据库。
+//   - 为用户生成 JWT 令牌并返回。
+//
+// 参数:
+//   - in: 包含用户注册信息的请求结构体。
+//
+// 返回值:
+//   - *user.RegisterResp: 包含生成的 JWT 令牌和过期时间的响应结构体。
+//   - error: 如果注册过程中出现错误，则返回相应的错误信息。
 func (l *RegisterLogic) Register(in *user.RegisterReq) (*user.RegisterResp, error) {
 	// 验证用户是否注册过
-	// 调用FindOneByPhoneNumber方法通过手机号查找用户，如果发生错误且错误不是models.ErrNotFound，返回错误
+	// 调用 FindOneByPhoneNumber 方法通过手机号查找用户，
+	// 如果发生错误且错误不是 models.ErrNotFound，返回错误
 	userEntity, err := l.svcCtx.UsersModel.FindOneByPhoneNumber(l.ctx, in.Phone)
 	if err != nil && !errors.Is(err, models.ErrNotFound) {
 		return nil, err
 	}
 
-	// 如果用户已经存在，返回ErrPhoneIsRegistered错误
+	// 如果用户已经存在，返回 ErrPhoneIsRegistered 错误
 	if userEntity != nil {
 		return nil, ErrPhoneIsRegistered
 	}
@@ -60,12 +74,14 @@ func (l *RegisterLogic) Register(in *user.RegisterReq) (*user.RegisterResp, erro
 		},
 	}
 
-	// 如果输入的密码不为空，生成密码哈希并赋值给用户实体
+	// 如果输入的密码不为空
 	if len(in.Password) > 0 {
+		// 调用 GenPasswordHash 方法生成密码哈希
 		genPassword, err := encrypt.GenPasswordHash([]byte(in.Password))
 		if err != nil {
 			return nil, err
 		}
+		// 将密码哈希赋值给用户实体的 Password 字段
 		userEntity.Password = sql.NullString{
 			String: string(genPassword),
 			Valid:  true,
@@ -78,16 +94,16 @@ func (l *RegisterLogic) Register(in *user.RegisterReq) (*user.RegisterResp, erro
 		return nil, err
 	}
 
-	// 生成token
-	// 获取当前时间的Unix时间戳
+	// 生成 token
+	// 获取当前时间的 Unix 时间戳
 	now := time.Now().Unix()
-	// 调用GetJwtToken方法生成JWT令牌
+	// 调用 GetJwtToken 方法生成 JWT 令牌
 	token, err := ctxdata.GetJwtToken(l.svcCtx.Config.Jwt.AccessSecret, now, l.svcCtx.Config.Jwt.AccessExpire, userEntity.Id)
 	if err != nil {
 		return nil, err
 	}
 
-	// 返回注册响应，其中包含生成的token和过期时间
+	// 返回注册响应，其中包含生成的 token 和过期时间
 	return &user.RegisterResp{
 		Token:  token,
 		Expire: now + l.svcCtx.Config.Jwt.AccessExpire,

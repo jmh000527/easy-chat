@@ -2,12 +2,11 @@ package user
 
 import (
 	"context"
+	"easy-chat/apps/user/api/internal/svc"
+	"easy-chat/apps/user/api/internal/types"
 	"easy-chat/apps/user/rpc/user"
 	"easy-chat/pkg/ctxdata"
 	"github.com/jinzhu/copier"
-
-	"easy-chat/apps/user/api/internal/svc"
-	"easy-chat/apps/user/api/internal/types"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -27,6 +26,20 @@ func NewDetailLogic(ctx context.Context, svcCtx *svc.ServiceContext) *DetailLogi
 }
 
 // Detail 通过用户ID获取用户的详细信息。
+//
+// 功能描述:
+//   - 从上下文中获取用户ID。
+//   - 使用该用户ID调用 svcCtx 的 User.GetUserInfo 方法获取用户详细信息。
+//   - 将获取到的用户信息转换为 types.User 类型。
+//   - 构建并返回包含用户详细信息的响应对象。
+//
+// 参数:
+//   - req: *types.UserInfoReq
+//     请求参数，包含需要获取用户详细信息的用户ID（从上下文中获取）.
+//
+// 返回值:
+//   - *types.UserInfoResp: 包含用户详细信息的响应对象。
+//   - error: 如果获取用户信息或处理过程中发生错误，则返回相应的错误信息。
 func (l *DetailLogic) Detail(req *types.UserInfoReq) (resp *types.UserInfoResp, err error) {
 	// 从上下文中获取用户ID
 	uid := ctxdata.GetUId(l.ctx)

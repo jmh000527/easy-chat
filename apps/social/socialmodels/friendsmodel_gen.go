@@ -31,7 +31,7 @@ type (
 		FindByUidAndFid(ctx context.Context, uid, fid string) (*Friends, error)
 		Update(ctx context.Context, data *Friends) error
 		Delete(ctx context.Context, id int64) error
-		LiseByUserId(ctx context.Context, uid string) ([]*Friends, error)
+		ListByUserId(ctx context.Context, uid string) ([]*Friends, error)
 	}
 
 	defaultFriendsModel struct {
@@ -142,7 +142,7 @@ func (m *defaultFriendsModel) Update(ctx context.Context, data *Friends) error {
 	return err
 }
 
-func (m *defaultFriendsModel) LiseByUserId(ctx context.Context, userId string) ([]*Friends, error) {
+func (m *defaultFriendsModel) ListByUserId(ctx context.Context, userId string) ([]*Friends, error) {
 	query := fmt.Sprintf("select %s from %s where `user_id` = ? ", friendsRows, m.table)
 	var resp []*Friends
 	err := m.QueryRowsNoCacheCtx(ctx, &resp, query, userId)

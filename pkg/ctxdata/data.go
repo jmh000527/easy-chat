@@ -1,6 +1,8 @@
 package ctxdata
 
-import "context"
+import (
+	"context"
+)
 
 // GetUId 从上下文中尝试获取用户ID。
 // 如果上下文中存在以Identify为键的值，并且该值的类型为string，则返回该字符串值。

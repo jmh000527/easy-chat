@@ -23,7 +23,20 @@ func NewFindUserLogic(ctx context.Context, svcCtx *svc.ServiceContext) *FindUser
 	}
 }
 
-// FindUser 根据请求参数查找用户
+// FindUser 根据请求参数查找用户。
+//
+// 功能描述:
+//   - 根据不同的请求参数（手机号、用户名、用户ID列表）从数据库中查找用户，可以查找单个或多个用户。
+//   - 如果查询成功，将用户实体填充到响应对象中并返回。
+//   - 如果查询过程中出现错误，则返回相应的错误信息。
+//
+// 参数:
+//   - in: *user.FindUserReq
+//     包含查找用户所需的请求参数（手机号、用户名、用户ID列表）。
+//
+// 返回值:
+//   - *user.FindUserResp: 包含查询到的用户信息的响应对象。
+//   - error: 如果查询过程中发生错误，返回相应的错误信息。
 func (l *FindUserLogic) FindUser(in *user.FindUserReq) (*user.FindUserResp, error) {
 	var (
 		userEntities []*models.Users // 用于存储用户实体的切片
@@ -46,8 +59,8 @@ func (l *FindUserLogic) FindUser(in *user.FindUserReq) (*user.FindUserResp, erro
 		userEntities, err = l.svcCtx.UsersModel.ListByIds(l.ctx, in.Ids)
 	}
 
+	// 处理查询过程中出现的错误
 	if err != nil {
-		// 如果查询过程中出现错误，则直接返回错误
 		return nil, err
 	}
 

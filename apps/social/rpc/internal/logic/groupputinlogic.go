@@ -29,16 +29,23 @@ func NewGroupPutinLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GroupP
 	}
 }
 
-// GroupPutin 是群组加入逻辑的主要函数
+// GroupPutin 处理群组加入请求
+//
+// 功能描述:
+//   - 根据请求的类型（用户申请、群成员邀请、管理员/创建者邀请）处理群组加入请求。
+//   - 如果群组不需要验证，直接将用户加入群组；否则，根据请求的来源和群组角色处理请求。
+//
+// 参数:
+//   - in: `*social.GroupPutinReq` 类型，包含用户ID、群组ID、请求消息、请求时间、加入来源等信息。
+//
+// 返回值:
+//   - `*social.GroupPutinResp`: 处理结果的响应，可能包含群组ID。
+//   - `error`: 处理过程中发生的错误。
 func (l *GroupPutinLogic) GroupPutin(in *social.GroupPutinReq) (*social.GroupPutinResp, error) {
-	//  1. 普通用户申请 ： 如果群无验证直接进入
-	//  2. 群成员邀请： 如果群无验证直接进入
-	//  3. 群管理员/群创建者邀请：直接进入群
-
 	// 定义局部变量，用于存储查询结果和错误信息
 	var (
-		inviteGroupMember *socialmodels.GroupMembers // 邀请者群组成员信息
-		userGroupMember   *socialmodels.GroupMembers // 用户群组成员信息
+		inviteGroupMember *socialmodels.GroupMembers // 邀请者的群组成员信息
+		userGroupMember   *socialmodels.GroupMembers // 用户的群组成员信息
 		groupInfo         *socialmodels.Groups       // 群组信息
 		err               error                      // 错误信息
 	)
@@ -47,7 +54,7 @@ func (l *GroupPutinLogic) GroupPutin(in *social.GroupPutinReq) (*social.GroupPut
 	userGroupMember, err = l.svcCtx.GroupMembersModel.FindByGroudIdAndUserId(l.ctx, in.ReqId, in.GroupId)
 	if err != nil && err != socialmodels.ErrNotFound {
 		// 如果查询出错且错误不是“未找到”，则返回错误
-		return nil, errors.Wrapf(xerr.NewDBErr(), "find group member by groud id and  req id err %v, req %v, %v", err, in.GroupId, in.ReqId)
+		return nil, errors.Wrapf(xerr.NewDBErr(), "find group member by group id and req id err %v, req %v, %v", err, in.GroupId, in.ReqId)
 	}
 	if userGroupMember != nil {
 		// 如果用户已经是群组成员，则直接返回成功响应
@@ -58,7 +65,7 @@ func (l *GroupPutinLogic) GroupPutin(in *social.GroupPutinReq) (*social.GroupPut
 	groupReq, err := l.svcCtx.GroupRequestsModel.FindByGroupIdAndReqId(l.ctx, in.GroupId, in.ReqId)
 	if err != nil && err != socialmodels.ErrNotFound {
 		// 如果查询出错且错误不是“未找到”，则返回错误
-		return nil, errors.Wrapf(xerr.NewDBErr(), "find group req by groud id and user id err %v, req %v, %v", err, in.GroupId, in.ReqId)
+		return nil, errors.Wrapf(xerr.NewDBErr(), "find group req by group id and req id err %v, req %v, %v", err, in.GroupId, in.ReqId)
 	}
 	if groupReq != nil {
 		// 如果用户已经有加入群组的请求，则直接返回成功响应
@@ -94,7 +101,7 @@ func (l *GroupPutinLogic) GroupPutin(in *social.GroupPutinReq) (*social.GroupPut
 	groupInfo, err = l.svcCtx.GroupsModel.FindOne(l.ctx, in.GroupId)
 	if err != nil {
 		// 如果查询出错，则返回错误
-		return nil, errors.Wrapf(xerr.NewDBErr(), "find group by groud id err %v, req %v", err, in.GroupId)
+		return nil, errors.Wrapf(xerr.NewDBErr(), "find group by group id err %v, req %v", err, in.GroupId)
 	}
 
 	// 验证是否要验证加入请求
@@ -121,7 +128,7 @@ func (l *GroupPutinLogic) GroupPutin(in *social.GroupPutinReq) (*social.GroupPut
 	inviteGroupMember, err = l.svcCtx.GroupMembersModel.FindByGroudIdAndUserId(l.ctx, in.InviterUid, in.GroupId)
 	if err != nil {
 		// 如果查询出错，则返回错误
-		return nil, errors.Wrapf(xerr.NewDBErr(), "find group member by groud id and user id err %v, req %v", in.InviterUid, in.GroupId)
+		return nil, errors.Wrapf(xerr.NewDBErr(), "find group member by group id and user id err %v, req %v", in.InviterUid, in.GroupId)
 	}
 
 	if constants.GroupRoleLevel(inviteGroupMember.RoleLevel) == constants.CreatorGroupRoleLevel || constants.
@@ -147,6 +154,18 @@ func (l *GroupPutinLogic) GroupPutin(in *social.GroupPutinReq) (*social.GroupPut
 	return l.createGroupReq(groupReq, false)
 }
 
+// createGroupReq 插入群组请求并返回响应
+//
+// 功能描述:
+//   - 将群组请求插入数据库，并根据请求是否通过返回相应的响应。
+//
+// 参数:
+//   - groupReq: `*socialmodels.GroupRequests` 类型，包含群组请求的信息。
+//   - isPass: `bool` 类型，指示请求是否通过（true表示通过，false表示待审核）
+//
+// 返回值:
+//   - `*social.GroupPutinResp`: 处理结果的响应，可能包含群组ID。
+//   - `error`: 处理过程中发生的错误。
 func (l *GroupPutinLogic) createGroupReq(groupReq *socialmodels.GroupRequests, isPass bool) (*social.GroupPutinResp, error) {
 	// 将群组请求插入数据库
 	_, err := l.svcCtx.GroupRequestsModel.Insert(l.ctx, groupReq)
@@ -164,6 +183,16 @@ func (l *GroupPutinLogic) createGroupReq(groupReq *socialmodels.GroupRequests, i
 	return &social.GroupPutinResp{}, nil
 }
 
+// createGroupMember 创建群组成员
+//
+// 功能描述:
+//   - 将用户作为群组成员插入数据库。
+//
+// 参数:
+//   - in: `*social.GroupPutinReq` 类型，包含用户ID和群组ID等信息。
+//
+// 返回值:
+//   - `error`: 处理过程中发生的错误。
 func (l *GroupPutinLogic) createGroupMember(in *social.GroupPutinReq) error {
 	// 构建群组成员结构体，并设置相关属性
 	groupMember := &socialmodels.GroupMembers{
@@ -176,7 +205,7 @@ func (l *GroupPutinLogic) createGroupMember(in *social.GroupPutinReq) error {
 	_, err := l.svcCtx.GroupMembersModel.Insert(l.ctx, nil, groupMember)
 	if err != nil {
 		// 如果插入失败，则返回错误，并包装为数据库错误类型，同时附带错误信息和群组成员详情
-		return errors.Wrapf(xerr.NewDBErr(), "insert friend err: %v req: %v", err, groupMember)
+		return errors.Wrapf(xerr.NewDBErr(), "insert group member err: %v req: %v", err, groupMember)
 	}
 
 	// 如果没有错误发生，则返回nil表示操作成功
