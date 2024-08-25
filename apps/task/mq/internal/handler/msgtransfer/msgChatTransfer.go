@@ -12,10 +12,38 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+// MsgChatTransfer 处理聊天消息的转发。
+//
+// 该结构体嵌套了 baseMsgTransfer，并用于处理从消息队列中消费的聊天消息。
 type MsgChatTransfer struct {
 	*baseMsgTransfer
 }
 
+// NewMsgChatTransfer 创建一个新的 MsgChatTransfer 实例。
+//
+// 该函数用于初始化并返回一个新的消息聊天转发器实例，它封装了基本消息转发的功能。
+//
+// 参数:
+//   - svc: 服务上下文对象，包含了服务配置和依赖的服务实例。
+//
+// 返回值:
+//   - *MsgChatTransfer: 初始化好的消息聊天转发器实例。
+func NewMsgChatTransfer(svc *svc.ServiceContext) *MsgChatTransfer {
+	return &MsgChatTransfer{
+		NewBaseMsgTransfer(svc),
+	}
+}
+
+// Consume 处理从消息队列中消费的聊天消息。
+//
+// 该方法从消息队列中获取的数据进行反序列化、记录日志，并将消息转发给目标用户。
+//
+// 参数:
+//   - key: 消息队列中的键值，通常用于标识消息。
+//   - value: 消息队列中的值，包含聊天消息的详细数据，以 JSON 格式存储。
+//
+// 返回值:
+//   - error: 如果在处理过程中出现错误，返回相应的错误；否则返回 nil。
 func (m *MsgChatTransfer) Consume(key, value string) error {
 	fmt.Println("key:", key, "value:", value)
 
@@ -71,10 +99,4 @@ func (m *MsgChatTransfer) addChatLog(ctx context.Context, msgId primitive.Object
 		return err
 	}
 	return m.svcCtx.ConversationModel.UpdateMsg(ctx, &chatLog)
-}
-
-func NewMsgChatTransfer(svc *svc.ServiceContext) *MsgChatTransfer {
-	return &MsgChatTransfer{
-		NewBaseMsgTransfer(svc),
-	}
 }

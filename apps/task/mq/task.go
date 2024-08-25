@@ -58,16 +58,26 @@ func main() {
 }
 
 func Run(c config.Config) {
+	// 配置初始化，确保服务配置正确无误。
 	if err := c.SetUp(); err != nil {
 		panic(err)
 	}
+
+	// 创建服务上下文。
 	ctx := svc.NewServiceContext(c)
+
+	// 初始化监听器，用于处理服务请求。
 	listen := handler.NewListen(ctx)
 
+	// 创建服务组，用于统一管理和启动服务。
 	serviceGroup := service.NewServiceGroup()
+
+	// 将所有服务添加到服务组中。
 	for _, s := range listen.Services() {
 		serviceGroup.Add(s)
 	}
+
+	// 启动服务组，开始监听和处理请求。
 	fmt.Println("start mqueue server at ", c.ListenOn, " ..... ")
 	serviceGroup.Start()
 }

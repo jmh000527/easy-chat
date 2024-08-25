@@ -33,7 +33,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	}
 }
 
-// SetRootToken 为系统设置根令牌。
+// SetRootToken 为系统设置根令牌，存储到 redis，供 kafka 客户端连接 websocket 服务使用
 //
 // 功能描述:
 //   - 生成一个系统根令牌，并将其存储到 Redis 中。

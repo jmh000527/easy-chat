@@ -36,10 +36,12 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	if err != nil {
 		panic(err)
 	}
+
 	// 设置token
 	header := http.Header{}
 	header.Set("Authorization", token)
-	// 创建Websocket客户端
+
+	// 创建Websocket客户端，并设置 JWT 认证信息
 	svc.WsClient = websocket.NewClient(c.Ws.Host, websocket.WithClientHeader(header))
 	return svc
 }

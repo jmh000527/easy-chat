@@ -5,6 +5,7 @@ import (
 	"easy-chat/apps/im/ws/internal/handler"
 	"easy-chat/apps/im/ws/internal/svc"
 	"easy-chat/apps/im/ws/websocket"
+	"easy-chat/apps/im/ws/websocket/auth"
 	"easy-chat/pkg/configserver"
 	"flag"
 	"fmt"
@@ -85,15 +86,17 @@ func Run(c config.Config) {
 		panic(err)
 	}
 
+	// 服务上下文
 	ctx := svc.NewServiceContext(c)
 	srv := websocket.NewServer(c.ListenOn,
-		websocket.WithWebsocketAuthentication(handler.NewJwtAuth(ctx)),
-		websocket.WithServerAck(websocket.NoAck),
+		websocket.WithWebsocketAuthentication(auth.NewJwtAuth(ctx)),
+		websocket.WithServerAck(websocket.OnlyAck),
 		websocket.WithWebsocketMaxConnectionIdle(7*time.Hour),
 		websocket.WithServerSendErrCount(3),
 	)
 	defer srv.Stop()
 
+	// 注册路由
 	handler.RegisterHandlers(srv, ctx)
 
 	fmt.Println("start websocket server at ", c.ListenOn, " ..... ")
