@@ -40,11 +40,12 @@ func (l *GetConversationsLogic) GetConversations(in *im.GetConversationsReq) (*i
 	var res im.GetConversationsResp
 	copier.Copy(&res, &data)
 
-	// 根据会话列表查询具体会话
+	// 获取会话列表
 	ids := make([]string, 0, len(data.ConversationList))
 	for _, conversation := range data.ConversationList {
 		ids = append(ids, conversation.ConversationId)
 	}
+	// 获取该用户所有会话详情
 	conversations, err := l.svcCtx.ConversationModel.ListByConversationIds(l.ctx, ids)
 	if err != nil {
 		return nil, errors.Wrapf(xerr.NewDBErr(), "list conversations by conversation ids failed, err: %v, req: %v", err, in)
@@ -52,6 +53,7 @@ func (l *GetConversationsLogic) GetConversations(in *im.GetConversationsReq) (*i
 
 	// 计算是否存在未读消息
 	for _, conversation := range conversations {
+		// 如果该会话不存在，则跳过
 		if _, ok := res.ConversationList[conversation.ConversationId]; !ok {
 			continue
 		}
